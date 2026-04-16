@@ -4,5 +4,5 @@ namespace GameBoardOthello.BackEnd.Interface;
 
 public interface IBoard
 {
-    Square[,] Square { get; set; }
+    public Square[,] Square { get; set; }
 }
