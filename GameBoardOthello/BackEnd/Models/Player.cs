@@ -1,6 +1,8 @@
 using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
 
+namespace GameBoardOthello.BackEnd.BackEnd.Models;
+
 public class Player : IPlayer
 {
     public string Name { get; set; }

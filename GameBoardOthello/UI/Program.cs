@@ -1,3 +1,4 @@
+using GameBoardOthello.BackEnd.BackEnd.Models;
 using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
 using GameBoardOthello.BackEnd.Models;
@@ -58,7 +59,9 @@ public class Program
             {
                 ConsoleRenderer.RenderBoard(board, new List<Position>());
                 game.EndGame();
-                ConsoleRenderer.ShowGameOver(board);
+                
+                var players = game.GetPlayer(null!);
+                ConsoleRenderer.ShowGameOver(board, players);
                 break;
             }
 

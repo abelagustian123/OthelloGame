@@ -72,7 +72,7 @@ public class ConsoleRenderer
         Console.WriteLine($"\nSkor -> Black (B): {black} | White (W): {white}");
     }
 
-    public static void ShowGameOver(IBoard board)
+    public static void ShowGameOver(IBoard board, List<IPlayer> players)
     {
         var (black, white) = CountDisks(board);
 
@@ -86,9 +86,15 @@ public class ConsoleRenderer
         Console.WriteLine();
 
         if (black > white)
-            Console.WriteLine(">>> PEMENANG: Black (B) <<<");
+        {
+            var winner = players.FirstOrDefault(p => p.PlayerColors == Colors.Black);
+            Console.WriteLine($">>> PEMENANG: {winner?.Name} - Black (B) <<<");
+        }
         else if (white > black)
-            Console.WriteLine(">>> PEMENANG: White (W) <<<");
+        {
+            var winner = players.FirstOrDefault(p => p.PlayerColors == Colors.White);
+            Console.WriteLine($">>> PEMENANG: {winner?.Name} - White (W) <<<");
+        }
         else
             Console.WriteLine(">>> HASIL: SERI <<<");
     }
