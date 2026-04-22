@@ -54,7 +54,8 @@ public class Program
             IBoard board = game.GetBoard(null!);
             IPlayer currentPlayer = game.GetCurrentPlayer(null!);
             int totalDisks = game.GetTotalDisks(0);
-
+            Position? lastMove = game.GetLastMovePosition();
+            
             if (game.IsBoardFull(totalDisks) || game.IsBothPlayersCannotMove())
             {
                 ConsoleRenderer.RenderBoard(board, new List<Position>());
@@ -69,7 +70,7 @@ public class Program
 
             if (validMoves.Count == 0)
             {
-                ConsoleRenderer.RenderBoard(board, validMoves);
+                ConsoleRenderer.RenderBoard(board, validMoves, lastMove);
                 Console.WriteLine($"\n{currentPlayer.Name} tidak punya move valid. Turn di-skip.");
                 game.NotifyTurnSkipped(currentPlayer);
                 game.SwitchTurn(currentPlayer);
@@ -78,7 +79,7 @@ public class Program
                 continue;
             }
 
-            ConsoleRenderer.RenderBoard(board, validMoves);
+            ConsoleRenderer.RenderBoard(board, validMoves, lastMove);
             ConsoleRenderer.ShowScore(board);
             Console.WriteLine($"\nGiliran: {currentPlayer.Name} ({currentPlayer.PlayerColors})");
             Console.WriteLine($"Valid moves: {string.Join(", ", validMoves.Select(p => $"({p.Row},{p.Col})"))}");

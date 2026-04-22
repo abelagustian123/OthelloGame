@@ -22,7 +22,7 @@ public class ConsoleRenderer
         Console.WriteLine();
     }
 
-    public static void RenderBoard(IBoard board, List<Position> validMoves)
+    public static void RenderBoard(IBoard board, List<Position> validMoves, Position? lastMove = null)
     {
         Console.Clear();
         int rows = board.Square.GetLength(0);
@@ -44,10 +44,21 @@ public class ConsoleRenderer
             {
                 var sq = board.Square[r, c];
                 bool isValid = validMoves.Any(p => p.Row == r && p.Col == c);
+                bool isLastMove = lastMove.HasValue && lastMove.Value.Row == r && lastMove.Value.Col == c;
 
                 if (sq?.Disk != null)
                 {
-                    Console.Write(sq.Disk.DiskColor == Colors.Black ? " B " : " W ");
+                    if (isLastMove)
+                    {
+                        // Highlight last move dengan warna kuning dan kurung siku
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.Write(sq.Disk.DiskColor == Colors.Black ? "[B]" : "[W]");
+                        Console.ResetColor();
+                    }
+                    else
+                    {
+                        Console.Write(sq.Disk.DiskColor == Colors.Black ? " B " : " W ");
+                    }
                 }
                 else if (isValid)
                 {

@@ -20,6 +20,8 @@ public class GameController : IGameController
     private int _totalDisksOnBoard;
     private Square? _lastPlacedSquare;
 
+    private Position? _lastMovePosition = null;
+    
     public GameController(List<IPlayer> players, IBoard board)
     {
         _players = players;
@@ -182,6 +184,8 @@ public class GameController : IGameController
 
     public void PutDiskOnBoard(IPlayer player, Square square, int totalDisksOnBoard)
     {
+        _lastMovePosition = square.Position;
+        
         // Letakkan disk di square yang dituju
         _board.Square[square.Position.Row, square.Position.Col].Disk = 
             new Disk(player.PlayerColors);
@@ -324,6 +328,11 @@ public class GameController : IGameController
         }
     }
 
+    public Position? GetLastMovePosition()
+    {
+        return _lastMovePosition;
+    }
+    
     public void NotifyTurnSkipped(IPlayer player)
     {
         OnTurnSkipped?.Invoke(player);
