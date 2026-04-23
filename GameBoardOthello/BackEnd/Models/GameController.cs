@@ -1,4 +1,5 @@
 using GameBoardOthello.BackEnd.BackEnd.Interface;
+using GameBoardOthello.BackEnd.BackEnd.Models;
 using GameBoardOthello.BackEnd.BackEnd.Structs;
 using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
@@ -27,6 +28,9 @@ public class GameController : IGameController
 
     private Position? _lastMovePosition = null;
     
+    private List<MoveRecord> _moveHistory;
+    private Stack<GameSnapshot> _undoStack;
+    
     public GameController(List<IPlayer> players, IBoard board)
     {
         _players = players;
@@ -35,6 +39,8 @@ public class GameController : IGameController
         _validPlacesToMove = new Dictionary<IPlayer, List<Position>>();
         _currentPlayer = players[0];
         _totalDisksOnBoard = 0;
+        _moveHistory = new List<MoveRecord>();
+        _undoStack = new Stack<GameSnapshot>();
     }
     
     public void StartGame()
@@ -117,23 +123,145 @@ public class GameController : IGameController
         return false;
     }
 
+    public GameSnapshot CreateSnapshot(string gameId)
+    {
+        return new GameSnapshot(
+            gameId,
+            _board.Square,
+            _players,
+            _currentPlayer,
+            _totalDisksOnBoard,
+            _moveHistory,
+            IsBoardFull(_totalDisksOnBoard) || IsBothPlayersCannotMove()
+        );
+    }
+    
+    public void LoadFromSnapshot(GameSnapshot snapshot)
+    {
+        // Restore board state
+        for (int r = 0; r < 8; r++)
+        {
+            for (int c = 0; c < 8; c++)
+            {
+                _board.Square[r, c] = snapshot.BoardState[r, c];
+            }
+        }
+
+        // Restore current player
+        _currentPlayer = _players.First(p => p.Name == snapshot.CurrentPlayerName);
+    
+        // Restore counters
+        _totalDisksOnBoard = snapshot.TotalDisksOnBoard;
+    
+        // Restore move history
+        _moveHistory = new List<MoveRecord>(snapshot.MoveHistory);
+    
+        // Recalculate scores
+        CheckWinner();
+    }
+    
+    public List<MoveRecord> GetMoveHistory()
+    {
+        return new List<MoveRecord>(_moveHistory);
+    }
+    
     public void PutDiskOnBoard(IPlayer player, Square square, int totalDisksOnBoard)
     {
+        // Save state for undo BEFORE making changes
+        var snapshot = CreateSnapshot(string.Empty); // gameId will be set by service
+        _undoStack.Push(snapshot);
+
+        // Count disks before placing
+        int disksBeforeFlip = CountDisksOfColor(player.PlayerColors);
+
+        // Place disk on target square
         var targetSquare = _board.Square[square.Position.Row, square.Position.Col];
         targetSquare.Disk = new Disk(player.PlayerColors);
-        
-        //update game state
+
+        // Update game state
         _totalDisksOnBoard = totalDisksOnBoard + 1;
         _lastPlacedSquare = targetSquare;
         _lastMovePosition = square.Position;
 
-        // Flip disk lawan yang terjepit
+        // Flip opponent's disks
         DiskFlip(player, _board);
 
-        // Trigger event move made
+        // Count disks after flip
+        int disksAfterFlip = CountDisksOfColor(player.PlayerColors);
+        int disksFlipped = disksAfterFlip - disksBeforeFlip - 1; // -1 for placed disk
+
+        // Calculate current scores
+        var score = CalculateScore();
+
+        // Record move in history
+        var moveRecord = new MoveRecord(
+            _moveHistory.Count + 1,
+            player.Name,
+            player.PlayerColors.ToString(),
+            square.Position,
+            disksFlipped,
+            score.BlackScore,
+            score.WhiteScore
+        );
+        _moveHistory.Add(moveRecord);
+
+        // Notify observers
         NotifyMoveMade(_board, player);
     }
 
+    private int CountDisksOfColor(Colors color)
+    {
+        int count = 0;
+        for (int r = 0; r < 8; r++)
+        {
+            for (int c = 0; c < 8; c++)
+            {
+                var disk = _board.Square[r, c].Disk;
+                if (disk != null && disk.DiskColor == color)
+                    count++;
+            }
+        }
+        return count;
+    }
+    
+    private (int BlackScore, int WhiteScore) CalculateScore()
+    {
+        int blackCount = 0;
+        int whiteCount = 0;
+    
+        for (int r = 0; r < 8; r++)
+        {
+            for (int c = 0; c < 8; c++)
+            {
+                var disk = _board.Square[r, c].Disk;
+                if (disk != null)
+                {
+                    if (disk.DiskColor == Colors.Black)
+                        blackCount++;
+                    else
+                        whiteCount++;
+                }
+            }
+        }
+    
+        return (blackCount, whiteCount);
+    }
+    
+    public bool UndoLastMove()
+    {
+        if (_undoStack.Count == 0)
+            return false;
+
+        var previousState = _undoStack.Pop();
+        LoadFromSnapshot(previousState);
+    
+        // Remove last move from history
+        if (_moveHistory.Count > 0)
+            _moveHistory.RemoveAt(_moveHistory.Count - 1);
+    
+        return true;
+    }
+    
     public void DiskFlip(IPlayer player, IBoard board)
     {
         if (_lastPlacedSquare == null) return;

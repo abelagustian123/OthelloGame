@@ -1,5 +1,6 @@
 using GameBoardOthello.Api.DTOs.Responses;
 using GameBoardOthello.BackEnd.BackEnd.Interface;
+using GameBoardOthello.BackEnd.BackEnd.Models;
 using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
 using GameBoardOthello.BackEnd.Models;
@@ -119,6 +120,26 @@ public static class GameMapper
     {
         return new ValidMovesDto(
             positions.Select(p => new PositionDto(p.Row, p.Col)).ToList()
+        );
+    }
+    
+    public static MoveHistoryDto ToMoveHistoryDto(string gameId, List<MoveRecord> moves)
+    {
+        var moveDtos = moves.Select(m => new MoveRecordDto(
+            MoveNumber: m.MoveNumber,
+            PlayerName: m.PlayerName,
+            PlayerColor: m.PlayerColor,
+            Position: new PositionDto(m.Position.Row, m.Position.Col),
+            DisksFlipped: m.DisksFlipped,
+            BlackScoreAfter: m.BlackScoreAfter,
+            WhiteScoreAfter: m.WhiteScoreAfter,
+            Timestamp: m.Timestamp
+        )).ToList();
+
+        return new MoveHistoryDto(
+            GameId: gameId,
+            Moves: moveDtos,
+            TotalMoves: moves.Count
         );
     }
 }
