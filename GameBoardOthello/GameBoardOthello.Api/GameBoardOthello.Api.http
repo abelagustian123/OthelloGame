@@ -1,0 +1,6 @@
+@GameBoardOthello.Api_HostAddress = http://localhost:5143
+
+GET {{GameBoardOthello.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

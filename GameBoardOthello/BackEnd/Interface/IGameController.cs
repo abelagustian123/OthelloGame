@@ -1,3 +1,4 @@
+using GameBoardOthello.BackEnd.BackEnd.Interface;
 using GameBoardOthello.BackEnd.Models;
 using GameBoardOthello.BackEnd.Structs;
 
