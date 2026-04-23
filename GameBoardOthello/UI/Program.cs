@@ -5,7 +5,7 @@ using GameBoardOthello.BackEnd.Interface;
 using GameBoardOthello.BackEnd.Models;
 using GameBoardOthello.BackEnd.Structs;
 
-namespace GameBoardOthello.BackEnd.UI;
+namespace GameBoardOthello.UI;
 
 public class Program
 {

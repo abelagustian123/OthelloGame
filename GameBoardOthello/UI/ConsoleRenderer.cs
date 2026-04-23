@@ -3,7 +3,7 @@ using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
 using GameBoardOthello.BackEnd.Structs;
 
-namespace GameBoardOthello.BackEnd.UI;
+namespace GameBoardOthello.UI;
 
 public class ConsoleRenderer
 {
@@ -26,55 +26,67 @@ public class ConsoleRenderer
     public static void RenderBoard(IBoard board, List<Position> validMoves, Position? lastMove = null)
     {
         Console.Clear();
-        int rows = board.Square.GetLength(0);
-        int cols = board.Square.GetLength(1);
+        var rows = board.Square.GetLength(0);
+        var cols = board.Square.GetLength(1);
 
+        // Cetak header kolom (0 1 2 3...)
         Console.Write("    ");
-        for (int c = 0; c < cols; c++)
+        for (var c = 0; c < cols; c++)
             Console.Write($" {c} ");
         Console.WriteLine();
 
+        // Cetak garis batas atas
         Console.Write("   +");
-        for (int c = 0; c < cols; c++) Console.Write("---");
+        for (var c = 0; c < cols; c++) Console.Write("---");
         Console.WriteLine("+");
 
-        for (int r = 0; r < rows; r++)
+        for (var r = 0; r < rows; r++)
         {
+            // Cetak nomor baris dan garis batas kiri (Warna Default Terminal)
             Console.Write($" {r} |");
-            for (int c = 0; c < cols; c++)
+
+            // ---> MENGAKTIFKAN BACKGROUND HIJAU UNTUK AREA PAPAN <---
+            Console.BackgroundColor = ConsoleColor.Gray;
+
+            for (var c = 0; c < cols; c++)
             {
                 var sq = board.Square[r, c];
-                bool isValid = validMoves.Any(p => p.Row == r && p.Col == c);
-                bool isLastMove = lastMove.HasValue && lastMove.Value.Row == r && lastMove.Value.Col == c;
+                var isValid = validMoves.Any(p => p.Row == r && p.Col == c);
+                var isLastMove = lastMove.HasValue && lastMove.Value.Row == r && lastMove.Value.Col == c;
 
-                if (sq?.Disk != null)
+                if (sq.Disk != null)
                 {
+                    // Tentukan warna teks (Foreground) Hitam atau Putih sesuai warna pion
+                    Console.ForegroundColor =
+                        sq.Disk.DiskColor == Colors.Black ? ConsoleColor.Black : ConsoleColor.White;
+
                     if (isLastMove)
-                    {
-                        // Highlight last move dengan warna kuning dan kurung siku
-                        Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.Write(sq.Disk.DiskColor == Colors.Black ? "[B]" : "[W]");
-                        Console.ResetColor();
-                    }
                     else
-                    {
                         Console.Write(sq.Disk.DiskColor == Colors.Black ? " B " : " W ");
-                    }
                 }
                 else if (isValid)
                 {
+                    // Warna kuning untuk penanda langkah yang valid
+                    Console.ForegroundColor = ConsoleColor.DarkRed;
                     Console.Write(" * ");
                 }
                 else
                 {
+                    // Tips UI: Gunakan warna DarkGreen untuk titik kosong agar terlihat menyatu dengan background
+                    Console.ForegroundColor = ConsoleColor.DarkBlue;
                     Console.Write(" . ");
                 }
             }
+
+            // ---> RESET WARNA SEBELUM MENCETAK BATAS KANAN <---
+            Console.ResetColor();
             Console.WriteLine("|");
         }
 
+        // Cetak garis batas bawah
         Console.Write("   +");
-        for (int c = 0; c < cols; c++) Console.Write("---");
+        for (var c = 0; c < cols; c++) Console.Write("---");
         Console.WriteLine("+");
     }
 
@@ -108,25 +120,25 @@ public class ConsoleRenderer
             Console.WriteLine($">>> PEMENANG: {winner?.Name} - White (W) <<<");
         }
         else
+        {
             Console.WriteLine(">>> HASIL: SERI <<<");
+        }
     }
 
     private static (int black, int white) CountDisks(IBoard board)
     {
         int black = 0, white = 0;
-        int rows = board.Square.GetLength(0);
-        int cols = board.Square.GetLength(1);
+        var rows = board.Square.GetLength(0);
+        var cols = board.Square.GetLength(1);
 
-        for (int r = 0; r < rows; r++)
+        for (var r = 0; r < rows; r++)
+        for (var c = 0; c < cols; c++)
         {
-            for (int c = 0; c < cols; c++)
+            var disk = board.Square[r, c].Disk;
+            if (disk != null)
             {
-                var disk = board.Square[r, c]?.Disk;
-                if (disk != null)
-                {
-                    if (disk.DiskColor == Colors.Black) black++;
-                    else white++;
-                }
+                if (disk.DiskColor == Colors.Black) black++;
+                else white++;
             }
         }
 
