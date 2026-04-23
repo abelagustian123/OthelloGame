@@ -57,7 +57,7 @@ public class ConsoleRenderer
                 {
                     // Tentukan warna teks (Foreground) Hitam atau Putih sesuai warna pion
                     Console.ForegroundColor =
-                        sq.Disk.DiskColor == Colors.Black ? ConsoleColor.Black : ConsoleColor.White;
+                        sq.Disk.DiskColor == Colors.Black ? ConsoleColor.White : ConsoleColor.Black;
 
                     if (isLastMove)
                         Console.Write(sq.Disk.DiskColor == Colors.Black ? "[B]" : "[W]");

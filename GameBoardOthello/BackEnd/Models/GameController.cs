@@ -1,14 +1,15 @@
 using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
+using GameBoardOthello.BackEnd.Models;
 using GameBoardOthello.BackEnd.Structs;
 
-namespace GameBoardOthello.BackEnd.Models;
+namespace GameBoardOthello.BackEnd.BackEnd.Models;
 
 public class GameController : IGameController
 {
     private IBoard _board;
-    private Dictionary<IPlayer, int> _playerScore;
-    private Dictionary<IPlayer, List<Position>> _validPlacesToMove;
+    private Dictionary<IPlayer, int> _playerScore = new Dictionary<IPlayer, int>();
+    private Dictionary<IPlayer, List<Position>> _validPlacesToMove = new Dictionary<IPlayer, List<Position>>();
     private List<IPlayer> _players;
     
     public event Action<IPlayer>? OnTurnSkipped;
@@ -20,14 +21,12 @@ public class GameController : IGameController
     private int _totalDisksOnBoard;
     private Square? _lastPlacedSquare;
 
-    private Position? _lastMovePosition = null;
+    private Position? _lastMovePosition;
     
     public GameController(List<IPlayer> players, IBoard board)
     {
         _players = players;
         _board = board;
-        _playerScore = new Dictionary<IPlayer, int>();
-        _validPlacesToMove = new Dictionary<IPlayer, List<Position>>();
         _currentPlayer = players[0];
         _totalDisksOnBoard = 0;
     }
@@ -56,8 +55,8 @@ public class GameController : IGameController
         int midCol = cols / 2;
         board.Square[midRow - 1, midCol - 1].Disk = new Disk(Colors.White);
         board.Square[midRow - 1, midCol].Disk     = new Disk(Colors.Black);
-        board.Square[midRow,     midCol - 1].Disk = new Disk(Colors.Black);
-        board.Square[midRow,     midCol].Disk     = new Disk(Colors.White);
+        board.Square[midRow,midCol - 1].Disk = new Disk(Colors.Black);
+        board.Square[midRow,midCol].Disk     = new Disk(Colors.White);
 
         _totalDisksOnBoard = 4;
 
@@ -151,6 +150,7 @@ public class GameController : IGameController
         int rows = _board.Square.GetLength(0);
         int cols = _board.Square.GetLength(1);
 
+        //cek arah
         for (int d = 0; d < 8; d++)
         {
             int dr = directions[d, 0];
@@ -158,7 +158,8 @@ public class GameController : IGameController
             int r = square.Position.Row + dr;
             int c = square.Position.Col + dc;
             bool foundOpponent = false;
-
+            
+            //dilakukan pengecekan untuk memastikan gak keluar papan
             while (r >= 0 && r < rows && c >= 0 && c < cols)
             {
                 var disk = _board.Square[r, c].Disk;
@@ -168,7 +169,7 @@ public class GameController : IGameController
                 {
                     foundOpponent = true;
                 }
-                else // disk.DiskColor == playerColor
+                else 
                 {
                     if (foundOpponent) return true;
                     break;
@@ -184,6 +185,7 @@ public class GameController : IGameController
 
     public void PutDiskOnBoard(IPlayer player, Square square, int totalDisksOnBoard)
     {
+        //untuk nyimpen posisi move untuk tracking riwayar move
         _lastMovePosition = square.Position;
         
         // Letakkan disk di square yang dituju
@@ -192,6 +194,8 @@ public class GameController : IGameController
 
         // Update state internal
         _totalDisksOnBoard = totalDisksOnBoard + 1;
+        
+        //simpan referensi disk yang ditaruh untuk dipake di DiskFlip()
         _lastPlacedSquare = _board.Square[square.Position.Row, square.Position.Col];
 
         // Flip disk lawan yang terjepit
@@ -242,7 +246,7 @@ public class GameController : IGameController
                 }
                 else // disk.DiskColor == playerColor
                 {
-                    // Jepitan valid! Flip semua disk lawan di antaranya
+                    
                     foreach (var pos in toFlip)
                     {
                         board.Square[pos.Row, pos.Col].Disk = new Disk(playerColor);
@@ -253,8 +257,6 @@ public class GameController : IGameController
                 r += dr;
                 c += dc;
             }
-            // Kalau while loop selesai tanpa break di else → arah ini tidak menjepit,
-            // toFlip dibuang (tidak di-apply)
         }
     }
 
