@@ -141,7 +141,7 @@ public class GameController : IGameController
         Colors opponentColors = playerColors == Colors.Black ? Colors.White : Colors.Black;
 
         // 8 arah (horizontal, vertikal, diagonal)
-        int[,] directions = new int[,]
+        int[,] directions = 
         {
             { -1, -1 }, { -1, 0 }, { -1, 1 },
             {  0, -1 },            {  0, 1 },

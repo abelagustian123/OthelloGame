@@ -3,12 +3,13 @@ using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
 using GameBoardOthello.BackEnd.Models;
 using GameBoardOthello.BackEnd.Structs;
+using GameBoardOthello.UI;
 
 namespace GameBoardOthello.BackEnd.UI;
 
 public class Program
 {
-     private const int BoardSize = 8;
+    private const int BoardSize = 8;
 
     public static void Main(string[] args)
     {
