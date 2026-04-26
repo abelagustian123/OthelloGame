@@ -1,3 +1,5 @@
+using GameBoardOthello.BackEnd.BackEnd.Interface;
+using GameBoardOthello.BackEnd.BackEnd.Structs;
 using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
 using GameBoardOthello.BackEnd.Models;
@@ -18,9 +20,6 @@ public class GameController : IGameController
     public event Action<IBoard>? OnGameConcluded;
 
     private IPlayer _currentPlayer;
-    private int _totalDisksOnBoard;
-    private Square? _lastPlacedSquare;
-
     private Position? _lastMovePosition;
     
     public GameController(List<IPlayer> players, IBoard board)
@@ -28,12 +27,17 @@ public class GameController : IGameController
         _players = players;
         _board = board;
         _currentPlayer = players[0];
-        _totalDisksOnBoard = 0;
     }
     
-    public void StartGame()
+    public bool StartGame()
     {
+        if (_players == null || _players.Count < 2)
+        {
+            return false;
+        }
+
         InitializeGame(_players, _board);
+        return true;
     }
 
     public void InitializeGame(List<IPlayer> players, IBoard board)
@@ -58,10 +62,8 @@ public class GameController : IGameController
         board.Square[midRow,midCol - 1].Disk = new Disk(Colors.Black);
         board.Square[midRow,midCol].Disk     = new Disk(Colors.White);
 
-        _totalDisksOnBoard = 4;
-
         // Inisialisasi score dan valid moves untuk tiap player
-        foreach (var player in players)
+        foreach (IPlayer player in players) 
         {
             _playerScore[player] = 2;
             _validPlacesToMove[player] = new List<Position>();
@@ -71,36 +73,51 @@ public class GameController : IGameController
         _currentPlayer = players[0];
     }
 
-    public List<IPlayer> GetPlayer(List<IPlayer> players)
+    public List<IPlayer> GetPlayers() 
     {
         return _players;
     }
 
-    public IPlayer GetCurrentPlayer(IPlayer currentPlayer)
+    public IPlayer GetCurrentPlayer()
     {
         return _currentPlayer;
     }
 
-    public IBoard GetBoard(IBoard board)
+    public IBoard GetBoard()
     {
         return _board;
     }
 
-    public int GetTotalDisks(int totalDisksOnBoard)
+    public int GetTotalDisks()
     {
-        return _totalDisksOnBoard;
+        int total = 0;
+        int rows = _board.Square.GetLength(0);
+        int cols = _board.Square.GetLength(1);
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                if (_board.Square[row, col].Disk != null)
+                {
+                    total++;
+                }
+            }
+        }
+
+        return total;
     }
 
-    public bool HasAnyValidMove(IBoard board, IPlayer currentPlayer)
+    public bool HasAnyValidMove(IPlayer currentPlayer) 
     {
-        int rows = board.Square.GetLength(0);
-        int cols = board.Square.GetLength(1);
+        int rows = _board.Square.GetLength(0);
+        int cols = _board.Square.GetLength(1);
 
-        for (int r = 0; r < rows; r++)
+        for (int row = 0; row < rows; row++)
         {
-            for (int c = 0; c < cols; c++)
+            for (int col = 0; col < cols; col++)
             {
-                if (IsMoveValid(currentPlayer, board.Square[r, c]))
+                if (IsMoveValid(currentPlayer, _board.Square[row, col]))
                 {
                     return true;
                 }
@@ -112,17 +129,17 @@ public class GameController : IGameController
 
     public List<Position> GetValidMoves(IPlayer currentPlayer)
     {
-        var validMoves = new List<Position>();
+        List<Position> validMoves = new List<Position>();
         int rows = _board.Square.GetLength(0);
         int cols = _board.Square.GetLength(1);
 
-        for (int r = 0; r < rows; r++)
+        for (int row = 0; row < rows; row++)
         {
-            for (int c = 0; c < cols; c++)
+            for (int col = 0; col < cols; col++)
             {
-                if (IsMoveValid(currentPlayer, _board.Square[r, c]))
+                if (IsMoveValid(currentPlayer, _board.Square[row, col]))
                 {
-                    validMoves.Add(new Position(r, c));
+                    validMoves.Add(new Position(row, col));
                 }
             }
         }
@@ -134,155 +151,178 @@ public class GameController : IGameController
     public bool IsMoveValid(IPlayer currentPlayer, Square square)
     {
         // Square harus kosong (belum ada disk)
-        if (square.Disk != null) return false;
-
-        Colors playerColors = currentPlayer.PlayerColors;
-        Colors opponentColors = playerColors == Colors.Black ? Colors.White : Colors.Black;
-
-        // 8 arah (horizontal, vertikal, diagonal)
-        int[,] directions = 
+        if (square.Disk != null)
         {
-            { -1, -1 }, { -1, 0 }, { -1, 1 },
-            {  0, -1 },            {  0, 1 },
-            {  1, -1 }, {  1, 0 }, {  1, 1 }
-        };
+            return false;
+        }
+
+        Colors playerColor = currentPlayer.PlayerColors;
+        Colors opponentColor = playerColor == Colors.Black ? Colors.White : Colors.Black;
 
         int rows = _board.Square.GetLength(0);
         int cols = _board.Square.GetLength(1);
 
         //cek arah
-        for (int d = 0; d < 8; d++)
+        foreach (Direction direction in Direction.AllDirections)
         {
-            int dr = directions[d, 0];
-            int dc = directions[d, 1];
-            int r = square.Position.Row + dr;
-            int c = square.Position.Col + dc;
+            int currentRow = square.Position.Row + direction.RowDelta;
+            int currentCol = square.Position.Col + direction.ColDelta;
             bool foundOpponent = false;
-            
-            //dilakukan pengecekan untuk memastikan gak keluar papan
-            while (r >= 0 && r < rows && c >= 0 && c < cols)
-            {
-                var disk = _board.Square[r, c].Disk;
-                if (disk == null) break;
 
-                if (disk.DiskColor == opponentColors)
+            // Cek selama masih dalam batas papan
+            while (currentRow >= 0 && currentRow < rows && currentCol >= 0 && currentCol < cols)
+            {
+                Disk? disk = _board.Square[currentRow, currentCol].Disk;
+
+                if (disk == null)
                 {
-                    foundOpponent = true;
-                }
-                else 
-                {
-                    if (foundOpponent) return true;
                     break;
                 }
 
-                r += dr;
-                c += dc;
+                if (disk.DiskColor == opponentColor)
+                {
+                    foundOpponent = true;
+                }
+                else
+                {
+                    // Ketemu disk sendiri — jika sudah lewati lawan berarti valid
+                    if (foundOpponent)
+                    {
+                        return true;
+                    }
+                    break;
+                }
+
+                currentRow += direction.RowDelta;
+                currentCol += direction.ColDelta;
             }
         }
 
         return false;
     }
 
-    public void PutDiskOnBoard(IPlayer player, Square square, int totalDisksOnBoard)
+    public bool PutDiskOnBoard(IPlayer player, Square square)
     {
-        //untuk nyimpen posisi move untuk tracking riwayar move
+        if (square.Disk != null)
+        {
+            return false;
+        }
+
+        if (!IsMoveValid(player, square))
+        {
+            return false;
+        }
+
+        // Simpan posisi move untuk tracking riwayat move
         _lastMovePosition = square.Position;
-        
+
         // Letakkan disk di square yang dituju
-        _board.Square[square.Position.Row, square.Position.Col].Disk = 
+        _board.Square[square.Position.Row, square.Position.Col].Disk =
             new Disk(player.PlayerColors);
 
-        // Update state internal
-        _totalDisksOnBoard = totalDisksOnBoard + 1;
         
-        //simpan referensi disk yang ditaruh untuk dipake di DiskFlip()
-        _lastPlacedSquare = _board.Square[square.Position.Row, square.Position.Col];
-
-        // Flip disk lawan yang terjepit
-        DiskFlip(player, _board);
+        bool flipped = DiskFlip(player, _board);
+    
+        if (!flipped)
+        {
+            _board.Square[square.Position.Row, square.Position.Col].Disk = null;
+            _lastMovePosition = null;
+            return false;
+        }
 
         // Trigger event move made
         NotifyMoveMade(_board, player);
+
+        return true;
     }
 
-    public void DiskFlip(IPlayer player, IBoard board)
+    public bool DiskFlip(IPlayer player, IBoard board)
     {
-        if (_lastPlacedSquare == null) return;
+        if (_lastMovePosition  == null)
+        {
+            return false;
+        }
 
         Colors playerColor = player.PlayerColors;
         Colors opponentColor = playerColor == Colors.Black ? Colors.White : Colors.Black;
 
-        // 8 arah (horizontal, vertikal, diagonal)
-        int[,] directions = new int[,]
-        {
-            { -1, -1 }, { -1, 0 }, { -1, 1 },
-            {  0, -1 },            {  0, 1 },
-            {  1, -1 }, {  1, 0 }, {  1, 1 }
-        };
-
         int rows = board.Square.GetLength(0);
         int cols = board.Square.GetLength(1);
-        int startRow = _lastPlacedSquare.Position.Row;
-        int startCol = _lastPlacedSquare.Position.Col;
+        int startRow = _lastMovePosition .Value.Row;
+        int startCol = _lastMovePosition .Value.Col;
 
-        for (int d = 0; d < 8; d++)
+        bool anyFlipped = false;  
+
+        // Scan 8 arah menggunakan Direction struct
+        foreach (Direction direction in Direction.AllDirections)
         {
-            int dr = directions[d, 0];
-            int dc = directions[d, 1];
-            int r = startRow + dr;
-            int c = startCol + dc;
+            int currentRow = startRow + direction.RowDelta;
+            int currentCol = startCol + direction.ColDelta;
 
-            var toFlip = new List<Position>();
+            List<Position> disksToFlip = new List<Position>();
 
-            while (r >= 0 && r < rows && c >= 0 && c < cols)
+            while (currentRow >= 0 && currentRow < rows && currentCol >= 0 && currentCol < cols)
             {
-                var disk = board.Square[r, c].Disk;
-                if (disk == null) break;
+                Disk? disk = board.Square[currentRow, currentCol].Disk;
+
+                if (disk == null)
+                {
+                    break;
+                }
 
                 if (disk.DiskColor == opponentColor)
                 {
                     // Kandidat untuk di-flip, tapi belum pasti
-                    toFlip.Add(new Position(r, c));
+                    disksToFlip.Add(new Position(currentRow, currentCol));
                 }
-                else // disk.DiskColor == playerColor
+                else
                 {
-                    
-                    foreach (var pos in toFlip)
+                    // Jepitan valid! Flip semua disk lawan di antaranya
+                    if (disksToFlip.Count > 0)  
                     {
-                        board.Square[pos.Row, pos.Col].Disk = new Disk(playerColor);
+                        foreach (Position position in disksToFlip)
+                        {
+                            board.Square[position.Row, position.Col].Disk = new Disk(playerColor);
+                        }
+                        anyFlipped = true;  
                     }
                     break;
                 }
 
-                r += dr;
-                c += dc;
+                currentRow += direction.RowDelta;
+                currentCol += direction.ColDelta;
             }
         }
+
+        return anyFlipped;  
     }
 
-    public void SwitchTurn(IPlayer currentPlayer)
+    public IPlayer SwitchTurn()
     {
-        // Cari index pemain saat ini, lalu ambil pemain berikutnya (rotasi)
-        int currentIndex = _players.IndexOf(currentPlayer);
+        int currentIndex = _players.IndexOf(_currentPlayer);
         int nextIndex = (currentIndex + 1) % _players.Count;
         _currentPlayer = _players[nextIndex];
 
         // Trigger event turn switched
         NotifyTurnSwitched(_currentPlayer);
+
+        return _currentPlayer;
     }
 
-    public bool IsBoardFull(int totalDisksOnBoard)
+    public bool IsBoardFull()
     {
         int rows = _board.Square.GetLength(0);
         int cols = _board.Square.GetLength(1);
-        return totalDisksOnBoard >= rows * cols;
+        int totalSquares = rows * cols;
+
+        return GetTotalDisks() >= totalSquares;
     }
 
     public bool IsBothPlayersCannotMove()
     {
-        foreach (var player in _players)
+        foreach (IPlayer player in _players)
         {
-            if (HasAnyValidMove(_board, player))
+            if (HasAnyValidMove(player))
             {
                 return false;  // Ada 1 pemain yang masih bisa move → belum stuck
             }
@@ -290,19 +330,22 @@ public class GameController : IGameController
         return true;  // Semua pemain tidak bisa move
     }
 
-    public void EndGame()
+    public bool EndGame()
     {
-        // Hitung skor final
-        CheckWinner();
+        if (!IsBoardFull() && !IsBothPlayersCannotMove())
+        {
+            return false;
+        }
 
-        // Trigger event bahwa game sudah berakhir
+        CheckWinner();
         OnGameConcluded?.Invoke(_board);
+        return true;
     }
 
-    public void CheckWinner()
+    public Dictionary<IPlayer, int> CheckWinner()
     {
         // Reset skor semua pemain
-        foreach (var player in _players)
+        foreach (IPlayer player in _players)
         {
             _playerScore[player] = 0;
         }
@@ -311,23 +354,27 @@ public class GameController : IGameController
         int rows = _board.Square.GetLength(0);
         int cols = _board.Square.GetLength(1);
 
-        for (int r = 0; r < rows; r++)
+        for (int row = 0; row < rows; row++)
         {
-            for (int c = 0; c < cols; c++)
+            for (int col = 0; col < cols; col++)
             {
-                var disk = _board.Square[r, c].Disk;
+                Disk? disk = _board.Square[row, col].Disk;
+
                 if (disk != null)
                 {
-                    foreach (var player in _players)
+                    foreach (IPlayer player in _players)
                     {
                         if (player.PlayerColors == disk.DiskColor)
                         {
                             _playerScore[player]++;
+                            break;
                         }
                     }
                 }
             }
         }
+
+        return _playerScore;
     }
 
     public Position? GetLastMovePosition()

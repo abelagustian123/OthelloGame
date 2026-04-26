@@ -13,4 +13,10 @@
         <None Remove="UI\**" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Remove="GameBoardOthello.Api\**" />
+        <EmbeddedResource Remove="GameBoardOthello.Api\**" />
+        <None Remove="GameBoardOthello.Api\**" />
+    </ItemGroup>
+
 </Project>

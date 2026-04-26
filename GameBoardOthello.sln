@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameBoardOthello", "GameBoa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "GameBoardOthello\UI\UI.csproj", "{97E1174D-5532-41A9-AC7F-CE40CA2D40E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameBoardOthello.Api", "GameBoardOthello\GameBoardOthello.Api\GameBoardOthello.Api.csproj", "{BD195033-CC4B-411D-ADF0-17232B49F969}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{97E1174D-5532-41A9-AC7F-CE40CA2D40E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97E1174D-5532-41A9-AC7F-CE40CA2D40E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97E1174D-5532-41A9-AC7F-CE40CA2D40E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD195033-CC4B-411D-ADF0-17232B49F969}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD195033-CC4B-411D-ADF0-17232B49F969}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD195033-CC4B-411D-ADF0-17232B49F969}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD195033-CC4B-411D-ADF0-17232B49F969}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

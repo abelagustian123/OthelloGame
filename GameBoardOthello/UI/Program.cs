@@ -1,3 +1,4 @@
+using GameBoardOthello.BackEnd.BackEnd.Interface;
 using GameBoardOthello.BackEnd.BackEnd.Models;
 using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
@@ -5,7 +6,7 @@ using GameBoardOthello.BackEnd.Models;
 using GameBoardOthello.BackEnd.Structs;
 using GameBoardOthello.UI;
 
-namespace GameBoardOthello.BackEnd.UI;
+namespace GameBoardOthello.UI;
 
 public class Program
 {
@@ -16,16 +17,17 @@ public class Program
         Console.Title = "Othello Game";
         ConsoleRenderer.ShowWelcome();
 
-        var (p1Name, p2Name) = ConsoleInputHandler.GetPlayerNames();
+        (string p1Name, string p2Name) = ConsoleInputHandler.GetPlayerNames();
 
         IPlayer blackPlayer = new Player(p1Name, Colors.Black);
         IPlayer whitePlayer = new Player(p2Name, Colors.White);
-        var players = new List<IPlayer> { blackPlayer, whitePlayer };
+        List<IPlayer> players = new List<IPlayer> { blackPlayer, whitePlayer };
 
         IBoard board = new Board(new Square[BoardSize, BoardSize]);
 
-        var game = new GameController(players, board);
+        GameController game = new GameController(players, board);
 
+        // Subscribe to events
         game.OnTurnSwitched += (player) =>
             Console.WriteLine($"  >> Giliran berpindah ke: {player.Name} ({player.PlayerColors})");
 
@@ -38,7 +40,16 @@ public class Program
         game.OnGameConcluded += (b) =>
             Console.WriteLine("  >> Permainan telah berakhir!");
 
-        game.StartGame();
+        // StartGame() now returns bool
+        bool started = game.StartGame();
+        if (!started)
+        {
+            Console.WriteLine("Gagal start game. Butuh minimal 2 players.");
+            Console.WriteLine("\nTekan ENTER untuk keluar...");
+            Console.ReadLine();
+            return;
+        }
+
         Console.WriteLine("\nGame dimulai! Tekan ENTER...");
         Console.ReadLine();
 
@@ -52,29 +63,31 @@ public class Program
     {
         while (true)
         {
-            IBoard board = game.GetBoard(null!);
-            IPlayer currentPlayer = game.GetCurrentPlayer(null!);
-            int totalDisks = game.GetTotalDisks(0);
+            IBoard board = game.GetBoard();
+            IPlayer currentPlayer = game.GetCurrentPlayer();
             Position? lastMove = game.GetLastMovePosition();
-            
-            if (game.IsBoardFull(totalDisks) || game.IsBothPlayersCannotMove())
+
+            if (game.IsBoardFull() || game.IsBothPlayersCannotMove())
             {
                 ConsoleRenderer.RenderBoard(board, new List<Position>());
-                game.EndGame();
                 
-                var players = game.GetPlayer(null!);
+                game.EndGame();
+
+                List<IPlayer> players = game.GetPlayers();
                 ConsoleRenderer.ShowGameOver(board, players);
                 break;
             }
 
-            var validMoves = game.GetValidMoves(currentPlayer);
+            List<Position> validMoves = game.GetValidMoves(currentPlayer);
 
             if (validMoves.Count == 0)
             {
                 ConsoleRenderer.RenderBoard(board, validMoves, lastMove);
                 Console.WriteLine($"\n{currentPlayer.Name} tidak punya move valid. Turn di-skip.");
                 game.NotifyTurnSkipped(currentPlayer);
-                game.SwitchTurn(currentPlayer);
+                
+                IPlayer nextPlayer = game.SwitchTurn();
+                
                 Console.WriteLine("\nTekan ENTER...");
                 Console.ReadLine();
                 continue;
@@ -88,9 +101,18 @@ public class Program
             Position selectedPos = ConsoleInputHandler.GetMoveInput(validMoves);
 
             Square targetSquare = board.Square[selectedPos.Row, selectedPos.Col];
-            game.PutDiskOnBoard(currentPlayer, targetSquare, totalDisks);
+            
+            bool moveSuccess = game.PutDiskOnBoard(currentPlayer, targetSquare);
+            
+            if (!moveSuccess)
+            {
+                Console.WriteLine("ERROR: Move gagal! (tidak seharusnya terjadi jika validasi benar)");
+                Console.WriteLine("Tekan ENTER...");
+                Console.ReadLine();
+                continue;
+            }
 
-            game.SwitchTurn(currentPlayer);
+            IPlayer nextPlayer2 = game.SwitchTurn();
 
             Console.WriteLine("\nTekan ENTER...");
             Console.ReadLine();

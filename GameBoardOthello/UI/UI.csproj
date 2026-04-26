@@ -12,5 +12,4 @@
     <ItemGroup>
         <ProjectReference Include="..\GameBoardOthello.csproj" />
     </ItemGroup>
-
 </Project>
