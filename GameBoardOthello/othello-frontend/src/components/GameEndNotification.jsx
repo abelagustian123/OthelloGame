@@ -1,5 +1,3 @@
-// src/components/GameEndNotification.jsx
-
 const CONFETTI_COLORS = ['#d4b483', '#e8e4dc', '#6aab72', '#e05555', '#7ec8e3']
 
 function GameEndNotification({ winner, score, player1, player2, isExiting, onGoNow }) {

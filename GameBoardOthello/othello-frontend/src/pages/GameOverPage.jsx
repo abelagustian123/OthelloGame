@@ -1,9 +1,7 @@
-// src/pages/GameOverPage.jsx
 import Board from '../components/Board'
 import Disk  from '../components/Disk'
 
 function GameOverPage({ gameState, onPlayAgain, onHome }) {
-    // No completed game yet — show empty state
     if (!gameState) {
         return (
             <div className="page page--gameover">

@@ -1,9 +1,7 @@
-// src/components/Board.jsx
 import Disk from './Disk'
 
 const COLS = ['A','B','C','D','E','F','G','H']
 
-// Square is internal to Board — not exported, used only here
 function Square({ data, onClick, disabled }) {
     const { row, col, disk, isValidMove, isLastMove } = data
     const handleClick = () => { if (isValidMove && !disabled) onClick(row, col) }

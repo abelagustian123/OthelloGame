@@ -1,10 +1,5 @@
-// src/components/Nav.jsx
 import { useState, useCallback, useRef } from 'react'
 
-// Tab accessibility rules:
-// 'Game'      — only when game is in progress
-// 'Game Over' — always (shows empty state if no finished game)
-// 'Home'      — always
 const TAB_MESSAGES = {
     Game: 'Start a game first to access this page.',
 }
@@ -104,7 +99,6 @@ function Nav({ page, onNavigate, statusDot, musicOn, onToggleMusic, gameInProgre
                 </div>
             </nav>
 
-            {/* Nav toast — appears below nav when tab is not accessible */}
             {toast && (
                 <div className={`nav-toast${toast.isExiting ? ' nav-toast--out' : ''}`}>
                     {toast.message}

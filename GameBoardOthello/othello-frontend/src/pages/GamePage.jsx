@@ -1,4 +1,3 @@
-// src/pages/GamePage.jsx
 import Board  from '../components/Board'
 import Disk   from '../components/Disk'
 
@@ -61,7 +60,6 @@ function GamePage({
                     ))}
                 </div>
 
-                {/* Demo scenarios — only before first move */}
                 {showDemo && (
                     <div className="sidebar-section">
                         <p className="sidebar-label">
@@ -106,7 +104,6 @@ function GamePage({
 
             </aside>
 
-            {/* ── Center board ── */}
             <main className="game-center">
                 <div className="game-center__header">
                     <h2 className="game-center__title">
@@ -132,7 +129,6 @@ function GamePage({
                 </div>
             </main>
 
-            {/* ── Right panel ── */}
             <aside className="game-panel">
                 <div className="score-card">
                     <p className="sidebar-label">Score</p>
@@ -163,7 +159,6 @@ function GamePage({
                 </div>
             </aside>
 
-            {/* ── Bottom status bar ── */}
             <div className="game-statusbar">
                 <span>● {legalCount} Legal</span>
                 <span>● Black {blackScore}</span>

@@ -53,7 +53,10 @@ public class GameApiController : ControllerBase
     public IActionResult GetState(string gameId)
     {
         var game = _gameService.GetGame(gameId);
-        if (game == null) return NotFound($"Game {gameId} not found");
+        if (game == null)
+        {
+            return NotFound($"Game {gameId} not found");
+        }
 
         var (board, players) = _gameService.GetGameData(gameId)!.Value;
         var state = GameMapper.ToGameStateDto(gameId, game, board, players);

@@ -1,5 +1,3 @@
-// src/components/Disk.jsx
-
 function Disk({ color, small }) {
     const cls = color?.toLowerCase()
     return (

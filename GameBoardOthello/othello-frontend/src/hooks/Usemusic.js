@@ -1,44 +1,27 @@
 // src/hooks/useMusic.js
 import { useState, useEffect, useRef, useCallback } from 'react'
 
-/**
- * Manages background music playback with on/off toggle.
- * Handles browser autoplay policy by waiting for first user interaction.
- *
- * @param {string} src - Path to the audio file (e.g. '/music/musicAssets.mp3')
- * @returns {{ musicOn: boolean, toggleMusic: () => void }}
- */
-export function useMusic(src) {
-    const [musicOn, setMusicOn] = useState(true)
+const SFX_MAP = {
+    start: '/music/GameStart.mp3',
+    move:  '/music/moveDisk.mp3',
+}
+
+export function useMusic(bgmSrc) {
+    const [musicOn, setMusicOn] = useState(false)
     const audioRef = useRef(null)
 
-    // Initialize audio once on mount
     useEffect(() => {
-        const audio = new Audio(src)
+        const audio = new Audio(bgmSrc)
         audio.loop   = true
         audio.volume = 0.4
         audioRef.current = audio
-
-        // Browsers block autoplay until first user interaction.
-        // Try immediately; if blocked, wait for the first click.
-        const tryPlay = () => {
-            audio.play().catch(() => {
-                const unlock = () => {
-                    audio.play().catch(() => {})
-                    document.removeEventListener('click', unlock)
-                }
-                document.addEventListener('click', unlock)
-            })
-        }
-        tryPlay()
 
         return () => {
             audio.pause()
             audio.src = ''
         }
-    }, [src])
+    }, [bgmSrc])
 
-    // Sync play/pause whenever musicOn changes
     useEffect(() => {
         const audio = audioRef.current
         if (!audio) return
@@ -53,5 +36,14 @@ export function useMusic(src) {
         setMusicOn(prev => !prev)
     }, [])
 
-    return { musicOn, toggleMusic }
+    const playSfx = useCallback((name) => {
+        const src = SFX_MAP[name]
+        if (!src) return
+
+        const sfx = new Audio(src)
+        sfx.volume = name === 'start' ? 0.6 : 0.5
+        sfx.play().catch(() => {})
+    }, [])
+
+    return { musicOn, toggleMusic, playSfx }
 }

@@ -46,11 +46,11 @@ public class GameController : IGameController
         int cols = board.Square.GetLength(1);
 
         // Kosongkan semua square di papan
-        for (int r = 0; r < rows; r++)
+        for (int row = 0; row < rows; row++)
         {
-            for (int c = 0; c < cols; c++)
+            for (int col = 0; col < cols; col++)
             {
-                board.Square[r, c] = new Square(new Position(r, c), null);
+                board.Square[row, col] = new Square(new Position(row, col), null);
             }
         }
 
