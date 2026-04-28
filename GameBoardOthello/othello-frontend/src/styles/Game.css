@@ -1,12 +1,7 @@
-/* =======================================================
-   Game.css — Othello Frontend
-   Design: Editorial luxury dark (matching reference screenshots)
-   Font: 'DM Serif Display' + system
-   ======================================================= */
+
 
 @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&display=swap');
 
-/* ── Variables ─────────────────────────────────────────── */
 :root {
     --bg:          #0c0c0c;
     --surface:     #141414;
@@ -32,7 +27,6 @@
     --mono:        'DM Mono', monospace;
 }
 
-/* ── Reset ──────────────────────────────────────────────── */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 html, body {
@@ -50,16 +44,12 @@ html, body {
     flex-direction: column;
 }
 
-/* ── App shell ───────────────────────────────────────────── */
 .app {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-/* =======================================================
-   NAV
-   ======================================================= */
 .nav {
     display: flex;
     align-items: center;
@@ -147,18 +137,12 @@ html, body {
     50%       { opacity: 0.4; }
 }
 
-/* =======================================================
-   PAGE BASE
-   ======================================================= */
 .page {
     flex: 1;
     display: flex;
     overflow: hidden;
 }
 
-/* =======================================================
-   HOME PAGE
-   ======================================================= */
 .page--home {
     flex-direction: row;
     min-height: calc(100vh - 56px);
@@ -342,9 +326,6 @@ html, body {
     color: var(--text-dim);
 }
 
-/* =======================================================
-   BUTTONS
-   ======================================================= */
 .btn {
     padding: 14px 24px;
     border-radius: var(--radius);
@@ -384,9 +365,6 @@ html, body {
 
 .btn--outline:hover { border-color: #555; color: var(--text); }
 
-/* =======================================================
-   DISK
-   ======================================================= */
 .disk {
     position: relative;
     width: var(--disk-size);
@@ -431,9 +409,6 @@ html, body {
     to   { transform: scale(1); opacity: 1; }
 }
 
-/* =======================================================
-   SQUARE
-   ======================================================= */
 .sq {
     width: var(--cell-size);
     height: var(--cell-size);
@@ -459,7 +434,6 @@ html, body {
     position: relative;
 }
 
-/* Animated pulse ring on last move */
 .sq--last::after {
     content: '';
     position: absolute;
@@ -489,9 +463,6 @@ html, body {
     50%       { transform: scale(1.15); opacity: 0.9; }
 }
 
-/* =======================================================
-   BOARD
-   ======================================================= */
 .board-col-labels {
     display: flex;
     padding-left: 28px;
@@ -530,7 +501,6 @@ html, body {
     display: inline-block;
 }
 
-/* card that wraps the board */
 .board-card {
     background: var(--board-bg);
     border: 1px solid #1a2e1c;
@@ -541,9 +511,6 @@ html, body {
 
 .board-card--dim { opacity: 0.85; }
 
-/* =======================================================
-   GAME PAGE — 3-column layout
-   ======================================================= */
 .page--game {
     display: grid;
     grid-template-columns: 300px 1fr 280px;
@@ -611,7 +578,6 @@ html, body {
     overflow-y: auto;
 }
 
-/* status bar spans full width */
 .game-statusbar {
     grid-column: 1 / -1;
     border-top: 1px solid var(--border);
@@ -624,7 +590,6 @@ html, body {
     letter-spacing: 1px;
 }
 
-/* ── Sidebar shared ── */
 .sidebar-section { display: flex; flex-direction: column; gap: 14px; }
 .sidebar-section--grow { flex: 1; }
 
@@ -642,7 +607,6 @@ html, body {
     color: var(--text-muted);
 }
 
-/* ── Player row ── */
 .player-row {
     display: flex;
     align-items: center;
@@ -686,7 +650,6 @@ html, body {
     font-weight: 400;
 }
 
-/* ── Score card ── */
 .score-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -723,7 +686,6 @@ html, body {
     text-align: center;
 }
 
-/* ── Tips ── */
 .tips-card {
     display: flex;
     flex-direction: column;
@@ -753,9 +715,6 @@ html, body {
     margin-top: 1px;
 }
 
-/* =======================================================
-   GAME OVER PAGE
-   ======================================================= */
 .page--gameover {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -866,7 +825,6 @@ html, body {
     gap: 12px;
 }
 
-/* right side */
 .gameover-right {
     background: #0e0e0e;
     display: flex;
@@ -898,9 +856,6 @@ html, body {
     font-weight: 400;
 }
 
-/* =======================================================
-   RESPONSIVE
-   ======================================================= */
 @media (max-width: 1024px) {
     :root { --cell-size: 54px; --disk-size: 40px; }
 
@@ -934,9 +889,6 @@ html, body {
     .gameover-left  { padding: 48px 28px; border-right: none; }
 }
 
-/* =======================================================
-   CONFIRM DIALOG
-   ======================================================= */
 .confirm-overlay {
     position: fixed;
     inset: 0;
@@ -989,9 +941,6 @@ html, body {
     transform: translateY(-1px);
 }
 
-/* =======================================================
-   DEMO BUTTONS (Presentation Only)
-   ======================================================= */
 .demo-badge {
     display: inline-block;
     background: #2a1800;
@@ -1061,9 +1010,6 @@ html, body {
     display: block;
 }
 
-/* =======================================================
-   GAME OVER — EMPTY STATE
-   ======================================================= */
 .gameover-empty {
     display: flex;
     flex-direction: column;
@@ -1107,9 +1053,6 @@ html, body {
     line-height: 1.6;
 }
 
-/* =======================================================
-   MUSIC PLAYER
-   ======================================================= */
 .music-player {
     position: fixed;
     bottom: 24px;
@@ -1208,7 +1151,6 @@ html, body {
     border: none;
 }
 
-/* Animated equaliser bars when playing */
 .music-player__eq {
     display: flex;
     align-items: flex-end;
@@ -1240,9 +1182,6 @@ html, body {
     height: 4px;
 }
 
-/* =======================================================
-   MUSIC TOGGLE
-   ======================================================= */
 .music-toggle {
     display: flex;
     align-items: center;
@@ -1275,7 +1214,6 @@ html, body {
     background: rgba(212, 180, 131, 0.05);
 }
 
-/* Equalizer bars animation when music is playing */
 .music-bars {
     display: flex;
     align-items: flex-end;
@@ -1300,9 +1238,6 @@ html, body {
     50%       { transform: scaleY(1);   }
 }
 
-/* =======================================================
-   SKIP NOTIFICATION
-   ======================================================= */
 .skip-notif {
     position: fixed;
     top: 50%;
@@ -1331,7 +1266,6 @@ html, body {
     to   { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
 }
 
-/* Backdrop blur behind notification */
 .skip-notif__backdrop {
     position: fixed;
     inset: 0;
@@ -1349,7 +1283,6 @@ html, body {
 @keyframes skipBackdropIn  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes skipBackdropOut { from { opacity: 1; } to { opacity: 0; } }
 
-/* Card */
 .skip-notif__card {
     background: var(--card);
     border: 1px solid #2a2a2a;
@@ -1364,7 +1297,6 @@ html, body {
     min-width: 320px;
 }
 
-/* Top stripe color: gold for skip, red for both-skip */
 .skip-notif__card::before {
     content: '';
     position: absolute;
@@ -1425,7 +1357,6 @@ html, body {
     font-weight: 500;
 }
 
-/* Progress bar that depletes over the display duration */
 .skip-notif__progress {
     width: 100%;
     height: 2px;
@@ -1446,9 +1377,6 @@ html, body {
     to   { width: 0%; }
 }
 
-/* =======================================================
-   GAME END NOTIFICATION
-   ======================================================= */
 .gameend-overlay {
     position: fixed;
     inset: 0;
@@ -1501,7 +1429,6 @@ html, body {
     to   { transform: scale(0.9)  translateY(-20px); opacity: 0; }
 }
 
-/* Animated gold top stripe */
 .gameend-card__stripe {
     position: absolute;
     top: 0; left: 0; right: 0;
@@ -1522,7 +1449,6 @@ html, body {
     100% { background-position: 200% center; }
 }
 
-/* "GAME OVER" label */
 .gameend-card__eyebrow {
     font-family: var(--mono);
     font-size: 11px;
@@ -1531,7 +1457,6 @@ html, body {
     color: var(--text-muted);
 }
 
-/* Disk(s) at top */
 .gameend-card__disks {
     display: flex;
     align-items: center;
@@ -1539,7 +1464,6 @@ html, body {
     gap: 8px;
 }
 
-/* Winner / Draw headline */
 .gameend-card__headline {
     font-family: var(--serif);
     font-size: 42px;
@@ -1553,7 +1477,6 @@ html, body {
     font-style: italic;
 }
 
-/* Margin text e.g. "Wins by 14 stones" */
 .gameend-card__margin {
     font-family: var(--mono);
     font-size: 12px;
@@ -1562,7 +1485,6 @@ html, body {
     letter-spacing: 1.5px;
 }
 
-/* Score row */
 .gameend-card__score {
     display: flex;
     align-items: center;
@@ -1600,7 +1522,6 @@ html, body {
     letter-spacing: 2px;
 }
 
-/* Auto-redirect progress bar */
 .gameend-card__footer {
     display: flex;
     flex-direction: column;
@@ -1636,7 +1557,6 @@ html, body {
     to   { width: 0%;   }
 }
 
-/* Confetti particles for winner */
 .gameend-confetti {
     position: absolute;
     inset: 0;
@@ -1657,7 +1577,6 @@ html, body {
     100% { transform: translateY(500px) rotate(720deg); opacity: 0; }
 }
 
-/* Skip notif — game-ending variant (no next player) */
 .skip-notif__next--gameover {
     background: rgba(224, 85, 85, 0.1);
     border: 1px solid rgba(224, 85, 85, 0.25);
@@ -1666,9 +1585,6 @@ html, body {
     font-weight: 500;
 }
 
-/* =======================================================
-   NAV TOAST — small feedback when tab is not accessible
-   ======================================================= */
 .nav-toast {
     position: fixed;
     top: 68px;          /* just below nav */
@@ -1703,7 +1619,6 @@ html, body {
     to   { opacity: 0; transform: translateX(-50%) translateY(-8px); }
 }
 
-/* Dim nav tab when not applicable — subtle, not hidden */
 .nav-tab--disabled {
     opacity: 0.35;
     cursor: default;

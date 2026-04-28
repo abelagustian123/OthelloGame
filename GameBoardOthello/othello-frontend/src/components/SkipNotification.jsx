@@ -1,4 +1,3 @@
-// src/components/SkipNotification.jsx
 
 function SkipNotification({ skippedPlayer, nextPlayer, isExiting }) {
     const skippedColor = skippedPlayer?.color?.toLowerCase()
@@ -6,16 +5,13 @@ function SkipNotification({ skippedPlayer, nextPlayer, isExiting }) {
 
     return (
         <>
-            {/* Backdrop blur */}
             <div
                 className={`skip-notif__backdrop${isExiting ? ' skip-notif__backdrop--out' : ''}`}
             />
 
-            {/* Card */}
             <div className={`skip-notif${isExiting ? ' skip-notif--out' : ''}`}>
                 <div className="skip-notif__card">
 
-                    {/* Skipped player */}
                     <div className="skip-notif__disk-row">
                         {skippedColor && (
                             <div className={`disk disk--${skippedColor} disk--sm`}>
@@ -32,7 +28,6 @@ function SkipNotification({ skippedPlayer, nextPlayer, isExiting }) {
                         Cannot place a disc — turn is skipped
                     </p>
 
-                    {/* Next player — null means game is ending (both players stuck) */}
                     {nextPlayer ? (
                         <div className="skip-notif__next">
                             {nextColor && (
@@ -48,7 +43,6 @@ function SkipNotification({ skippedPlayer, nextPlayer, isExiting }) {
                         </div>
                     )}
 
-                    {/* Progress bar */}
                     <div className="skip-notif__progress">
                         <div className="skip-notif__progress-bar" />
                     </div>

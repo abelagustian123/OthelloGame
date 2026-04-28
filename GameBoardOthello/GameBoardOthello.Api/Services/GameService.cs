@@ -8,7 +8,6 @@ namespace GameBoardOthello.Api.Services;
 
 public class GameService
 {
-    // In-memory storage untuk active games
     private readonly Dictionary<string, GameController> _activeGames = new();
     private readonly Dictionary<string, (IBoard Board, List<IPlayer> Players)> _gameData = new();
     

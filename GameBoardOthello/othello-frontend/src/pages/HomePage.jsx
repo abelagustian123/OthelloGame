@@ -1,4 +1,3 @@
-// src/pages/HomePage.jsx
 import Disk from '../components/Disk'
 
 function HomePage({ p1, setP1, p2, setP2, onStart, loading }) {

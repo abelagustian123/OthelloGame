@@ -1,7 +1,3 @@
-// src/App.jsx
-// Root component — orchestrates state, routing, and event handlers.
-// All UI is delegated to pages/ and components/.
-
 import { useState, useCallback, useEffect } from 'react'
 import gameAPI from './services/api'
 
@@ -23,30 +19,24 @@ import './styles/Game.css'
 
 export default function App() {
 
-  // ── Routing ───────────────────────────────────────────────────
-  const [page, setPage] = useState('Home')  // 'Home' | 'Game' | 'Game Over'
+  const [page, setPage] = useState('Home')  
 
-  // ── Game state ────────────────────────────────────────────────
   const [gameId,            setGameId]            = useState(null)
   const [gameState,         setGameState]         = useState(null)
   const [lastFinishedState, setLastFinishedState] = useState(null)
 
-  // ── Form fields ───────────────────────────────────────────────
   const [p1, setP1] = useState('')
   const [p2, setP2] = useState('')
 
-  // ── Loading flags ─────────────────────────────────────────────
   const [loading,     setLoading]     = useState(false)
   const [moveLoading, setMoveLoading] = useState(false)
   const [skipLoading, setSkipLoading] = useState(false)
   const [statusMsg,   setStatusMsg]   = useState('')
 
-  // ── UI state ──────────────────────────────────────────────────
   const [confirmTarget, setConfirmTarget] = useState(null) // null | 'home' | 'gameover'
   const [isDemoMode,    setIsDemoMode]    = useState(false)
 
-  // ── Custom hooks ──────────────────────────────────────────────
-  const { musicOn, toggleMusic } = useMusic('/music/musicAssets.mp3')
+  const { musicOn, toggleMusic, playSfx } = useMusic('/music/musicAssets.mp3')
 
   const {
     skipNotif, showSkipNotif,
@@ -59,11 +49,9 @@ export default function App() {
         showSkipNotif, showGameEnd, setLastFinishedState, setPage,
       })
 
-  // ── Derived ───────────────────────────────────────────────────
   const gameInProgress =
       gameId !== null && gameState !== null && !gameState.isGameOver
 
-  // ── Esc shortcut ──────────────────────────────────────────────
   useEffect(() => {
     const fn = (e) => {
       if (e.key === 'Escape') {
@@ -75,16 +63,12 @@ export default function App() {
     return () => window.removeEventListener('keydown', fn)
   }, [gameInProgress])
 
-  // ── Navigation ────────────────────────────────────────────────
   const doGoHome = () => {
     setPage('Home'); setGameId(null); setGameState(null)
     setStatusMsg(''); setP1(''); setP2('')
     setConfirmTarget(null); setIsDemoMode(false)
   }
 
-  // handleNavigate is called by Nav AFTER it has already filtered
-  // inaccessible tabs (e.g. 'Game' when no game in progress).
-  // So here we only need to handle confirm dialogs and direct navigation.
   const handleNavigate = (target) => {
     if (target === page) return
 
@@ -95,7 +79,6 @@ export default function App() {
     }
 
     if (target === 'Game') {
-      // Nav already guards this — only reaches here when gameInProgress
       setPage('Game')
       return
     }
@@ -112,7 +95,6 @@ export default function App() {
       doGoHome()
     }
     if (confirmTarget === 'gameover') {
-      // Reset game session so "Game" tab is no longer accessible
       setGameId(null)
       setGameState(null)
       setIsDemoMode(false)
@@ -124,7 +106,6 @@ export default function App() {
 
   const handleConfirmNo = () => setConfirmTarget(null)
 
-  // ── Start game ────────────────────────────────────────────────
   const handleStart = useCallback(async () => {
     const name1 = p1.trim() || 'Player 1'
     const name2 = p2.trim() || 'Player 2'
@@ -134,10 +115,10 @@ export default function App() {
     if (data?.gameId) {
       setGameId(data.gameId); setGameState(data)
       setStatusMsg(''); setIsDemoMode(false); setPage('Game')
+      playSfx('start')
     }
-  }, [p1, p2])
+  }, [p1, p2, playSfx])
 
-  // ── Skip turn (real API) ──────────────────────────────────────
   const doSkip = useCallback(async (stateBeforeSkip, gId) => {
     setSkipLoading(true)
     const skippedPlayer = stateBeforeSkip?.currentPlayer
@@ -159,7 +140,6 @@ export default function App() {
     if (!hasAnyValidMove(data.board)) { await doSkip(data, gId) }
   }, [showSkipNotif, showGameEnd])
 
-  // ── Real move (API) ───────────────────────────────────────────
   const handleRealMove = useCallback(async (row, col) => {
     if (!gameId || moveLoading || skipLoading) return
     setMoveLoading(true); setStatusMsg('')
@@ -174,6 +154,7 @@ export default function App() {
 
     const newState = data.gameState
     setGameState(newState)
+    playSfx('move')
 
     if (newState.isGameOver) {
       setLastFinishedState(newState)
@@ -181,9 +162,8 @@ export default function App() {
       return
     }
     if (!hasAnyValidMove(newState.board)) { await doSkip(newState, gameId) }
-  }, [gameId, moveLoading, skipLoading, doSkip, showGameEnd])
+  }, [gameId, moveLoading, skipLoading, doSkip, showGameEnd, playSfx])
 
-  // ── Demo move (pure frontend, no API) ────────────────────────
   const handleDemoMove = useCallback((row, col) => {
     if (!gameState || moveLoading) return
     const playerColor = gameState.currentPlayer?.color
@@ -191,6 +171,7 @@ export default function App() {
 
     const newBoard  = applyDemoMove(gameState.board, row, col, playerColor)
     const { black, white } = countDisks(newBoard)
+    playSfx('move')
     const emptyCount = newBoard.flat().filter(sq => !sq.disk).length
 
     if (emptyCount === 0) {
@@ -220,14 +201,11 @@ export default function App() {
       score: { blackScore: black, whiteScore: white },
     }))
     setStatusMsg(`${nextPlayer.name} to Move`)
-  }, [gameState, moveLoading, showGameEnd])
+  }, [gameState, moveLoading, showGameEnd, playSfx])
 
-  // ── Unified move handler ──────────────────────────────────────
   const handleMove = isDemoMode ? handleDemoMove : handleRealMove
 
-  // ── Post-game navigation ──────────────────────────────────────
   const handlePlayAgain = () => {
-    // Keep player names for quick rematch
     setPage('Home'); setGameId(null); setGameState(null)
     setStatusMsg(''); setIsDemoMode(false)
   }
@@ -237,18 +215,15 @@ export default function App() {
     setStatusMsg(''); setP1(''); setP2(''); setIsDemoMode(false)
   }
 
-  // ── Derived display state ────────────────────────────────────
   const statusDot =
       page === 'Home'      ? 'ready' :
           page === 'Game'      ? 'live'  : 'concluded'
 
-  // Game Over page shows the just-finished game OR the last finished game
   const gameOverState =
       page === 'Game Over' && gameState?.isGameOver
           ? gameState
           : lastFinishedState
 
-  // ── Render ───────────────────────────────────────────────────
   return (
       <div className="app">
 
@@ -293,7 +268,6 @@ export default function App() {
             />
         )}
 
-        {/* Confirm exit dialog */}
         {confirmTarget && (
             <ConfirmDialog
                 message={
@@ -306,7 +280,6 @@ export default function App() {
             />
         )}
 
-        {/* Game end notification (shown before Game Over page) */}
         {gameEndNotif && (
             <GameEndNotification
                 winner={gameEndNotif.winner}
@@ -318,7 +291,6 @@ export default function App() {
             />
         )}
 
-        {/* Skip turn notification */}
         {skipNotif && (
             <SkipNotification
                 skippedPlayer={skipNotif.skippedPlayer}

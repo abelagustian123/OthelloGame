@@ -1,5 +1,3 @@
-// src/components/ConfirmDialog.jsx
-
 function ConfirmDialog({ message, onConfirm, onCancel }) {
     return (
         <div className="confirm-overlay" onClick={onCancel}>

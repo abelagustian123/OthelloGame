@@ -1,4 +1,3 @@
-// src/services/api.js
 import axios from 'axios'
 
 const BASE_URL =
@@ -11,37 +10,31 @@ const http = axios.create({
 })
 
 const gameAPI = {
-    // POST /game/start
     startGame: async (player1Name, player2Name) => {
         const res = await http.post('/game/start', { player1Name, player2Name })
         return res.data
     },
 
-    // GET /game/{id}/state
     getState: async (gameId) => {
         const res = await http.get(`/game/${gameId}/state`)
         return res.data
     },
 
-    // POST /game/{id}/move
     makeMove: async (gameId, row, col) => {
         const res = await http.post(`/game/${gameId}/move`, { row, col })
         return res.data
     },
 
-    // GET /game/{id}/valid-moves
     getValidMoves: async (gameId) => {
         const res = await http.get(`/game/${gameId}/valid-moves`)
         return res.data
     },
 
-    // POST /game/{id}/skip-turn
     skipTurn: async (gameId) => {
         const res = await http.post(`/game/${gameId}/skip-turn`)
         return res.data
     },
 
-    // DELETE /game/{id}
     deleteGame: async (gameId) => {
         const res = await http.delete(`/game/${gameId}`)
         return res.data
