@@ -1,4 +1,4 @@
-namespace GameBoardOthello.BackEnd.Structs;
+namespace GameBoardOthello.BackEnd.BackEnd.Structs;
 
 public struct Position
 {

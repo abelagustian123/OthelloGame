@@ -1,4 +1,4 @@
-namespace GameBoardOthello.BackEnd.Enum;
+namespace GameBoardOthello.BackEnd.BackEnd.Enums;
 
 public enum Colors
 {

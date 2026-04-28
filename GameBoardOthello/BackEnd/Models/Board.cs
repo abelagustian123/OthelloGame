@@ -1,7 +1,6 @@
-
 using GameBoardOthello.BackEnd.BackEnd.Interface;
-using GameBoardOthello.BackEnd.Interface;
-using GameBoardOthello.BackEnd.Models;
+
+namespace GameBoardOthello.BackEnd.BackEnd.Models;
 
 public class Board : IBoard
 {

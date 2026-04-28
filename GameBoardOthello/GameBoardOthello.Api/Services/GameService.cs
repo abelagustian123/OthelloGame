@@ -1,9 +1,8 @@
 using GameBoardOthello.Api.DTOs.Responses;
+using GameBoardOthello.BackEnd.BackEnd.Enums;
 using GameBoardOthello.BackEnd.BackEnd.Interface;
 using GameBoardOthello.BackEnd.BackEnd.Models;
-using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
-using GameBoardOthello.BackEnd.Models;
 
 namespace GameBoardOthello.Api.Services;
 

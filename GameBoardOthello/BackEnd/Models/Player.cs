@@ -1,4 +1,4 @@
-using GameBoardOthello.BackEnd.Enum;
+using GameBoardOthello.BackEnd.BackEnd.Enums;
 using GameBoardOthello.BackEnd.Interface;
 
 namespace GameBoardOthello.BackEnd.BackEnd.Models;

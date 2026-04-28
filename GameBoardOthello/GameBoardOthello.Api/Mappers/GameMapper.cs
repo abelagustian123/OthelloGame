@@ -1,10 +1,9 @@
 using GameBoardOthello.Api.DTOs.Responses;
+using GameBoardOthello.BackEnd.BackEnd.Enums;
 using GameBoardOthello.BackEnd.BackEnd.Interface;
 using GameBoardOthello.BackEnd.BackEnd.Models;
-using GameBoardOthello.BackEnd.Enum;
+using GameBoardOthello.BackEnd.BackEnd.Structs;
 using GameBoardOthello.BackEnd.Interface;
-using GameBoardOthello.BackEnd.Models;
-using GameBoardOthello.BackEnd.Structs;
 
 namespace GameBoardOthello.Api.Mappers;
 
@@ -17,6 +16,7 @@ public static class GameMapper
         List<IPlayer> players)
     {
         var currentPlayer = game.GetCurrentPlayer();
+        bool isGameOver = IsGameOver(game);
         
         return new GameStateDto(
             GameId: gameId,
@@ -26,7 +26,7 @@ public static class GameMapper
             Player2: MapPlayer(players[1]),
             Score: MapScore(board),
             IsGameOver: IsGameOver(game),
-            Winner: DetermineWinner(game, board, players)
+            Winner: DetermineWinner(game, board, players, isGameOver)
         );
     }
 
@@ -104,36 +104,30 @@ public static class GameMapper
     private static PlayerDto? DetermineWinner(
         GameController game,
         IBoard board,
-        List<IPlayer> players)
+        List<IPlayer> players,
+        bool isGameOver) 
     {
-        if (!IsGameOver(game))
+        if (!isGameOver) 
         {
             return null;
         }
 
         Dictionary<IPlayer, int> scores = game.CheckWinner();
-        
+    
         IPlayer? blackPlayer = players.FirstOrDefault(p => p.PlayerColors == Colors.Black);
         IPlayer? whitePlayer = players.FirstOrDefault(p => p.PlayerColors == Colors.White);
-        
+    
         if (blackPlayer == null || whitePlayer == null)
         {
             return null;
         }
-        
+    
         int blackScore = scores[blackPlayer];
         int whiteScore = scores[whitePlayer];
-        
-        if (blackScore > whiteScore)
-        {
-            return MapPlayer(blackPlayer);
-        }
-        
-        if (whiteScore > blackScore)
-        {
-            return MapPlayer(whitePlayer);
-        }
-        
+    
+        if (blackScore > whiteScore) return MapPlayer(blackPlayer);
+        if (whiteScore > blackScore) return MapPlayer(whitePlayer);
+    
         return null;
     }
 

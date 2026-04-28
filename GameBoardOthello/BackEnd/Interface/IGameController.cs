@@ -1,8 +1,8 @@
-using GameBoardOthello.BackEnd.BackEnd.Interface;
-using GameBoardOthello.BackEnd.Models;
-using GameBoardOthello.BackEnd.Structs;
+using GameBoardOthello.BackEnd.BackEnd.Models;
+using GameBoardOthello.BackEnd.BackEnd.Structs;
+using GameBoardOthello.BackEnd.Interface;
 
-namespace GameBoardOthello.BackEnd.Interface;
+namespace GameBoardOthello.BackEnd.BackEnd.Interface;
 
 public interface IGameController
 {

@@ -5,7 +5,6 @@ using GameBoardOthello.Api.Services;
 using GameBoardOthello.BackEnd.BackEnd.Interface;
 using GameBoardOthello.BackEnd.BackEnd.Models;
 using GameBoardOthello.BackEnd.Interface;
-using GameBoardOthello.BackEnd.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameBoardOthello.Api.Controllers;

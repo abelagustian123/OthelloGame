@@ -1,6 +1,6 @@
-using GameBoardOthello.BackEnd.Structs;
+using GameBoardOthello.BackEnd.BackEnd.Structs;
 
-namespace GameBoardOthello.BackEnd.Models;
+namespace GameBoardOthello.BackEnd.BackEnd.Models;
 
 public class Square
 {

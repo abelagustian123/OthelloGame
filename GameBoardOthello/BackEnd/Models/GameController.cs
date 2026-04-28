@@ -1,9 +1,8 @@
+using GameBoardOthello.BackEnd.BackEnd.Enums;
 using GameBoardOthello.BackEnd.BackEnd.Interface;
 using GameBoardOthello.BackEnd.BackEnd.Structs;
-using GameBoardOthello.BackEnd.Enum;
 using GameBoardOthello.BackEnd.Interface;
-using GameBoardOthello.BackEnd.Models;
-using GameBoardOthello.BackEnd.Structs;
+using Serilog;
 
 namespace GameBoardOthello.BackEnd.BackEnd.Models;
 
@@ -21,22 +20,28 @@ public class GameController : IGameController
 
     private IPlayer _currentPlayer;
     private Position? _lastMovePosition;
+
+    private readonly ILogger _logger = Log.ForContext<GameController>();
     
     public GameController(List<IPlayer> players, IBoard board)
     {
         _players = players;
         _board = board;
         _currentPlayer = players[0];
+        
+        _logger.Debug("GameController diinisiasi dengan {PlayerCount} pemain", players.Count);
     }
     
     public bool StartGame()
     {
         if (_players == null || _players.Count < 2)
         {
+            _logger.Warning("Game gagal dimulai, pemain kurang dari 2 atau null");
             return false;
         }
 
         InitializeGame(_players, _board);
+        _logger.Information($"Game dimulai dengan {_players.Count} pemain");
         return true;
     }
 
@@ -71,6 +76,8 @@ public class GameController : IGameController
 
         // Player pertama (biasanya Black) selalu mulai duluan di Othello
         _currentPlayer = players[0];
+        _logger.Information($"Board {rows}x{cols} diinisialisasi");
+        _logger.Debug($"Current Player {_currentPlayer.Name} dengan warna disk {_currentPlayer.PlayerColors}");
     }
 
     public List<IPlayer> GetPlayers() 
@@ -104,7 +111,8 @@ public class GameController : IGameController
                 }
             }
         }
-
+        
+        _logger.Debug($"Total disk saat ini {total}");
         return total;
     }
 
@@ -124,6 +132,7 @@ public class GameController : IGameController
             }
         }
 
+        _logger.Warning($"{currentPlayer.Name} tidak memiliki move valid");
         return false;
     }
 
@@ -145,6 +154,9 @@ public class GameController : IGameController
         }
 
         _validPlacesToMove[currentPlayer] = validMoves;
+        
+        _logger.Debug($"{currentPlayer.Name} memiliki {validMoves.Count} valid move");
+
         return validMoves;
     }
 
@@ -188,6 +200,7 @@ public class GameController : IGameController
                     // Ketemu disk sendiri — jika sudah lewati lawan berarti valid
                     if (foundOpponent)
                     {
+                        _logger.Debug($"Move valid di [{square.Position.Row},{square.Position.Col}] untuk {currentPlayer.Name}");
                         return true;
                     }
                     break;
@@ -205,11 +218,13 @@ public class GameController : IGameController
     {
         if (square.Disk != null)
         {
+            _logger.Warning($"Square dengan [{square.Position.Row}, {square.Position.Col}] sudah terisi");
             return false;
         }
 
         if (!IsMoveValid(player, square))
         {
+            _logger.Warning($"Move tidak valid di [{square.Position.Row}, {square.Position.Col}] oleh {player.Name}");
             return false;
         }
 
@@ -227,12 +242,13 @@ public class GameController : IGameController
         {
             _board.Square[square.Position.Row, square.Position.Col].Disk = null;
             _lastMovePosition = null;
+            _logger.Warning($"Disk flip batal, move dibatalkan di [{square.Position.Row}, {square.Position.Col}]");
             return false;
         }
 
-        // Trigger event move made
+        _logger.Information($"{player.Name} meletakan disk di [{square.Position.Row}, {square.Position.Col}]");
+        
         NotifyMoveMade(_board, player);
-
         return true;
     }
 
@@ -240,6 +256,7 @@ public class GameController : IGameController
     {
         if (_lastMovePosition  == null)
         {
+            _logger.Warning($"Disk Flip gagal dipanggil karena lastMovePosition null");
             return false;
         }
 
@@ -283,6 +300,7 @@ public class GameController : IGameController
                         foreach (Position position in disksToFlip)
                         {
                             board.Square[position.Row, position.Col].Disk = new Disk(playerColor);
+                            _logger.Debug($"{disksToFlip.Count} disk di flip oleh {player.Name}");
                         }
                         anyFlipped = true;  
                     }
@@ -314,8 +332,14 @@ public class GameController : IGameController
         int rows = _board.Square.GetLength(0);
         int cols = _board.Square.GetLength(1);
         int totalSquares = rows * cols;
+        bool isFull = GetTotalDisks() >= totalSquares;
 
-        return GetTotalDisks() >= totalSquares;
+        if (isFull)
+        {
+            _logger.Information("Board Penuh");
+        }
+        
+        return isFull;
     }
 
     public bool IsBothPlayersCannotMove()
@@ -324,20 +348,24 @@ public class GameController : IGameController
         {
             if (HasAnyValidMove(player))
             {
-                return false;  // Ada 1 pemain yang masih bisa move → belum stuck
+                return false;  
             }
         }
-        return true;  // Semua pemain tidak bisa move
+        
+        _logger.Information($"Kedua pemain tidak bisa menempatkan disk di board");
+        return true;  
     }
 
     public bool EndGame()
     {
         if (!IsBoardFull() && !IsBothPlayersCannotMove())
         {
+            _logger.Warning("Game masih belum selesai, board masih ada bisa diisi dan masih ada valid move");
             return false;
         }
 
         CheckWinner();
+        _logger.Information("Game over");
         OnGameConcluded?.Invoke(_board);
         return true;
     }
@@ -348,6 +376,7 @@ public class GameController : IGameController
         foreach (IPlayer player in _players)
         {
             _playerScore[player] = 0;
+            _logger.Debug("Player score ter-reset untuk dilakukan perhitungan total disk per player");
         }
 
         // Hitung ulang jumlah disk tiap player dengan scan seluruh papan
@@ -374,26 +403,38 @@ public class GameController : IGameController
             }
         }
 
+        foreach (KeyValuePair<IPlayer, int> score in _playerScore)
+        {
+            _logger.Information($"Skor {score.Key.Name} adalah {score.Value}");
+        }
         return _playerScore;
     }
 
     public Position? GetLastMovePosition()
     {
+        if (_lastMovePosition.HasValue)
+            _logger.Debug($"Last move position adalah [{_lastMovePosition.Value.Row},{_lastMovePosition.Value.Col}]" 
+                );
+        else
+            _logger.Debug("Last move position adalah null");
         return _lastMovePosition;
     }
     
     public void NotifyTurnSkipped(IPlayer player)
     {
+        _logger.Information($"Player {player.Name} di skip, tidak ada move valid");
         OnTurnSkipped?.Invoke(player);
     }
 
     public void NotifyTurnSwitched(IPlayer player)
     {
+        _logger.Information($"Player {player.Name}, sekarang giliran untuk menempatkan disk di board");
         OnTurnSwitched?.Invoke(player);
     }
 
     public void NotifyMoveMade(IBoard board, IPlayer player)
     {
+        _logger.Information($"Move telah dibuat oleh {player.Name}");
         OnMoveMade?.Invoke(board, player);
     }
 }

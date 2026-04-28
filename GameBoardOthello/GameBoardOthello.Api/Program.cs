@@ -1,4 +1,11 @@
 using GameBoardOthello.Api.Services;
+using Serilog;
+
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +32,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReact", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:5173")  // React dev servers
+        policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "http://localhost:3002")  // React dev servers
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -49,3 +56,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+Log.CloseAndFlush();

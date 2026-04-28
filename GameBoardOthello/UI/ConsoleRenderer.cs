@@ -1,7 +1,7 @@
+using GameBoardOthello.BackEnd.BackEnd.Enums;
 using GameBoardOthello.BackEnd.BackEnd.Interface;
-using GameBoardOthello.BackEnd.Enum;
+using GameBoardOthello.BackEnd.BackEnd.Structs;
 using GameBoardOthello.BackEnd.Interface;
-using GameBoardOthello.BackEnd.Structs;
 
 namespace GameBoardOthello.UI;
 

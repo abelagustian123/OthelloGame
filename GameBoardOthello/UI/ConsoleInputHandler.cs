@@ -1,4 +1,4 @@
-using GameBoardOthello.BackEnd.Structs;
+using GameBoardOthello.BackEnd.BackEnd.Structs;
 
 namespace GameBoardOthello.UI;
 
