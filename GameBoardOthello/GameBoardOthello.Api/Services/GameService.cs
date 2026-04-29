@@ -11,6 +11,8 @@ public class GameService
     private readonly Dictionary<string, GameController> _activeGames = new();
     private readonly Dictionary<string, (IBoard Board, List<IPlayer> Players)> _gameData = new();
     
+    private readonly ILogger<GameService> _logger;
+    
     public string CreateGame(string player1Name, string player2Name)
     {
         var gameId = Guid.NewGuid().ToString();

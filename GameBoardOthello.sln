@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# 
+#
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameBoardOthello", "GameBoardOthello\GameBoardOthello.csproj", "{2A8EB674-8469-4F89-87DE-6DF51E5561EE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UI", "GameBoardOthello\UI\UI.csproj", "{97E1174D-5532-41A9-AC7F-CE40CA2D40E2}"
@@ -8,6 +8,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameBoardOthello.Api", "GameBoardOthello\GameBoardOthello.Api\GameBoardOthello.Api.csproj", "{BD195033-CC4B-411D-ADF0-17232B49F969}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameBoardOthello.Tests", "GameBoardOthello.Tests\GameBoardOthello.Tests.csproj", "{1C628FCF-B926-4136-BC66-84CDB6F08482}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameBoardOthello.Tests", "GameBoardOthello\GameBoardOthello.Tests\GameBoardOthello.Tests.csproj", "{2FD1C591-A848-4B8F-B4F0-0307C9A5415C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -31,5 +33,9 @@ Global
 		{1C628FCF-B926-4136-BC66-84CDB6F08482}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C628FCF-B926-4136-BC66-84CDB6F08482}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C628FCF-B926-4136-BC66-84CDB6F08482}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2FD1C591-A848-4B8F-B4F0-0307C9A5415C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2FD1C591-A848-4B8F-B4F0-0307C9A5415C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2FD1C591-A848-4B8F-B4F0-0307C9A5415C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2FD1C591-A848-4B8F-B4F0-0307C9A5415C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
