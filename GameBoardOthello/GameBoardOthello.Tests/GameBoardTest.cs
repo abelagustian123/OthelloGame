@@ -6,34 +6,9 @@ using GameBoardOthello.BackEnd.Interface;
 
 namespace GameBoardOthello.Tests;
 
-//Dijadiin 1 class
-//nama class nya GameController.Test
-public class TestPlayer : IPlayer
-{
-    public string Name { get; set; }
-    public Colors PlayerColors { get; set; }
-}
-
-public class TestBoard : IBoard
-{
-    public TestBoard(int size = 8)
-    {
-        Square = new Square[size, size];
-
-        for (var i = 0; i < size; i++)
-        {
-            for (var j = 0; j < size; j++)
-            {
-                Square[i, j] = new Square(new Position(i, j), null);
-            }
-        }
-    }
-
-    public Square[,] Square { get; set; }
-}
 
 [TestFixture]
-public class StartGameShould
+public class GameControllerTests
 {
     private IBoard? _board;
     private GameController? _gameController;
@@ -56,8 +31,11 @@ public class StartGameShould
                 PlayerColors = Colors.White
             }
         };
+        
+        _gameController = new GameController(_players!, _board!);
+        _gameController.StartGame();
     }
-
+    
     [Test]
     public void StartGame_TwoPlayersAreNotProvided_False()
     {
@@ -72,8 +50,6 @@ public class StartGameShould
     [Test]
     public void StartGame_TwoPlayersAreProvided_True()
     {
-        _gameController = new GameController(_players, _board);
-
         var result = _gameController.StartGame();
 
         Assert.IsTrue(result);
@@ -82,46 +58,14 @@ public class StartGameShould
     [Test]
     public void StartGame_InitializeBoard_WithFourStartingDisks()
     {
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-
         var diskCount = _gameController.GetTotalDisks();
 
         Assert.That(diskCount, Is.EqualTo(4));
     }
-}
-
-[TestFixture]
-public class HasAnyValidShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer
-            {
-                Name = "John",
-                PlayerColors = Colors.Black
-            },
-            new TestPlayer
-            {
-                Name = "Smith",
-                PlayerColors = Colors.White
-            }
-        };
-    }
-
+    
     [Test]
     public void HasAnyValid_WhenHasAnyValidMove_True()
     {
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
         var hasValidMoves = _gameController.HasAnyValidMove(_players[0]);
 
         Assert.True(hasValidMoves, "Return true karena pemain punya langkah valid");
@@ -130,46 +74,24 @@ public class HasAnyValidShould
     [Test]
     public void HasAnyValid_BoardIsEmptyBecauseNoDisksToFlip_False()
     {
-        _gameController = new GameController(_players!, _board!);
+        int rows = _board.Square.GetLength(0);
+        int cols = _board.Square.GetLength(1);
 
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                _board.Square[row, col] = new Square(new Position(row, col), null);
+            }
+        }
         var result = _gameController.HasAnyValidMove(_players[0]);
 
         Assert.IsFalse(result, "Return false karena board kosong");
     }
-}
-
-[TestFixture]
-public class IsMoveValidShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer
-            {
-                Name = "John",
-                PlayerColors = Colors.Black
-            },
-            new TestPlayer
-            {
-                Name = "Smith",
-                PlayerColors = Colors.White
-            }
-        };
-    }
-
+    
     [Test]
     public void IsMoveValid_PlayerMakeFirstMoveValid_True()
     {
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-
         var isValid = _gameController.IsMoveValid(_players![0], _board!.Square[2, 3]);
 
         Assert.IsTrue(isValid, "Langkah valid untuk move pertama");
@@ -179,47 +101,14 @@ public class IsMoveValidShould
     [Test]
     public void IsMoveValid_PlayerMakeFirstMoveInvalid_False()
     {
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-
         var isInvalid = _gameController.IsMoveValid(_players![0], _board!.Square[2, 2]);
 
         Assert.IsFalse(isInvalid, "Langkah tidak valid");
     }
-}
-
-[TestFixture]
-public class GetValidMoveShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer
-            {
-                Name = "John",
-                PlayerColors = Colors.Black
-            },
-            new TestPlayer
-            {
-                Name = "Smith",
-                PlayerColors = Colors.White
-            }
-        };
-    }
-
+    
     [Test]
     public void GetValidMove_AtStartGame_ReturnFour()
     {
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-
         var validMoves = _gameController.GetValidMoves(_players[0]);
 
         Assert.That(validMoves.Count, Is.EqualTo(4), "Valid move seharusnya ada 4 pilihan");
@@ -233,42 +122,22 @@ public class GetValidMoveShould
     [Test]
     public void GetValidMove_NoValidMove_ReturnEmptyList()
     {
-        _gameController = new GameController(_players!, _board!);
+        int rows = _board.Square.GetLength(0);
+        int cols = _board.Square.GetLength(1);
+
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                _board.Square[row, col] = new Square(new Position(row, col), null);
+            }
+        }
 
         var result = _gameController.GetValidMoves(_players![0]);
 
         Assert.IsEmpty(result, "Harus mengembalikan list kosong, jika tidak ada move yang valid");
     }
-}
-
-[TestFixture]
-public class PutDiskOnBoardShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer
-            {
-                Name = "John",
-                PlayerColors = Colors.Black
-            },
-            new TestPlayer
-            {
-                Name = "Smith",
-                PlayerColors = Colors.White
-            }
-        };
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-    }
-
+    
     [Test]
     public void PutDiskOnBoard_MoveIsValid_ReturnTrue()
     {
@@ -290,28 +159,7 @@ public class PutDiskOnBoardShould
 
         Assert.IsFalse(result, "Return false karena langkah tidak valid");
     }
-}
-
-[TestFixture]
-public class GetPlayersShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer { Name = "John", PlayerColors = Colors.Black },
-            new TestPlayer { Name = "Smith", PlayerColors = Colors.White }
-        };
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-    }
-
+    
     [Test]
     public void GetPlayers_ThereIsAPlayer_ReturnTrue()
     {
@@ -333,28 +181,7 @@ public class GetPlayersShould
             Assert.That(player[1].PlayerColors, Is.EqualTo(Colors.White), "Disk White");
         });
     }
-}
-
-[TestFixture]
-public class GetCurrentPlayersShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer { Name = "John", PlayerColors = Colors.Black },
-            new TestPlayer { Name = "Smith", PlayerColors = Colors.White }
-        };
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-    }
-
+    
     [Test]
     public void GetCurrentPlayers_AtStartGame_ReturnBlackPlayer()
     {
@@ -371,28 +198,7 @@ public class GetCurrentPlayersShould
 
         Assert.That(player, Is.SameAs(_players[1]), "Current player berganti ke putih");
     }
-}
-
-[TestFixture]
-public class GetBoardShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer { Name = "John", PlayerColors = Colors.Black },
-            new TestPlayer { Name = "Smith", PlayerColors = Colors.White }
-        };
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-    }
-
+    
     [Test]
     public void GetBoard_BoardCalled_ReturnWithCorrectSize()
     {
@@ -412,28 +218,7 @@ public class GetBoardShould
         Assert.That(board.Square[4, 3].Disk.DiskColor, Is.EqualTo(Colors.Black));
         Assert.That(board.Square[4, 4].Disk.DiskColor, Is.EqualTo(Colors.White));
     }
-}
-
-[TestFixture]
-public class IsBoardFullShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer { Name = "John", PlayerColors = Colors.Black },
-            new TestPlayer { Name = "Smith", PlayerColors = Colors.White }
-        };
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-    }
-
+    
     [Test]
     public void IsBoardFull_BoardNotFull_False()
     {
@@ -456,28 +241,7 @@ public class IsBoardFullShould
 
         Assert.True(boardFull, "Board Full");
     }
-}
-
-[TestFixture]
-public class IsBothPlayerCannotMoveShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer { Name = "John", PlayerColors = Colors.Black },
-            new TestPlayer { Name = "Smith", PlayerColors = Colors.White }
-        };
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-    }
-
+    
     [Test]
     public void BothPlayerCannotMove_BothPlayerCanMove_False()
     {
@@ -504,28 +268,7 @@ public class IsBothPlayerCannotMoveShould
 
         Assert.True(playersCannotMove, "Player tidak dapat bergerak karena board penuh");
     }
-}
-
-[TestFixture]
-public class IsEndGameShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer { Name = "John", PlayerColors = Colors.Black },
-            new TestPlayer { Name = "Smith", PlayerColors = Colors.White }
-        };
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-    }
-
+    
     [Test]
     public void IsEndGame_GameNotEnd_False()
     {
@@ -554,28 +297,7 @@ public class IsEndGameShould
         Assert.That(players.Values.Max(), Is.EqualTo(40), "Player black memenangkan dengan 40 piece");
         Assert.That(players.Values.Min(), Is.EqualTo(24), "Player white hanya memasukkan 24 piece");
     }
-}
-
-[TestFixture]
-public class CheckWinnerShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer { Name = "John", PlayerColors = Colors.Black },
-            new TestPlayer { Name = "Smith", PlayerColors = Colors.White }
-        };
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-    }
-
+    
     [Test]
     public void CheckWinner_GameEnd_ReturnPlayerAndScore()
     {
@@ -595,28 +317,7 @@ public class CheckWinnerShould
         Assert.That(winner.Key.PlayerColors, Is.EqualTo(Colors.Black), "Player dengan piece terbanyak");
         Assert.That(winner.Value, Is.EqualTo(40), "Total 40 pieces");
     }
-}
-
-[TestFixture]
-public class GetLastMovePositionShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer { Name = "John", PlayerColors = Colors.Black },
-            new TestPlayer { Name = "Smith", PlayerColors = Colors.White }
-        };
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-    }
-
+    
     [Test]
     public void GetLastMovePosition_PlayerNoMoveMade_ReturnNull()
     {
@@ -635,28 +336,7 @@ public class GetLastMovePositionShould
         Assert.That(lastMove.Value.Row, Is.EqualTo(2), "Row 2");
         Assert.That(lastMove.Value.Col, Is.EqualTo(3), "Col 3");
     }
-}
-
-[TestFixture]
-public class DiskFlipShould
-{
-    private IBoard? _board;
-    private GameController? _gameController;
-    private List<IPlayer>? _players;
-
-    [SetUp]
-    public void SetUp()
-    {
-        _board = new TestBoard();
-        _players = new List<IPlayer>
-        {
-            new TestPlayer { Name = "John", PlayerColors = Colors.Black },
-            new TestPlayer { Name = "Smith", PlayerColors = Colors.White }
-        };
-        _gameController = new GameController(_players!, _board!);
-        _gameController.StartGame();
-    }
-
+    
     [Test]
     public void DiskFlip_DiskFlipCall_FlipEnemyColor()
     {
