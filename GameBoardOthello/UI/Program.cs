@@ -16,7 +16,7 @@ public class Program
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console()
-            .WriteTo.File(new JsonFormatter(), "logs/myapp.json", rollingInterval: RollingInterval.Day)
+            .WriteTo.File(new JsonFormatter(), "logs/myapp.log", rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
         try
