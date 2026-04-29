@@ -6,6 +6,8 @@ using GameBoardOthello.BackEnd.Interface;
 
 namespace GameBoardOthello.Tests;
 
+//Dijadiin 1 class
+//nama class nya GameController.Test
 public class TestPlayer : IPlayer
 {
     public string Name { get; set; }

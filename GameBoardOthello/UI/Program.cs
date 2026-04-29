@@ -3,6 +3,7 @@ using GameBoardOthello.BackEnd.BackEnd.Interface;
 using GameBoardOthello.BackEnd.BackEnd.Models;
 using GameBoardOthello.BackEnd.Interface;
 using Serilog;
+using Serilog.Formatting.Json;
 
 namespace GameBoardOthello.UI;
 
@@ -15,7 +16,7 @@ public class Program
         Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
             .WriteTo.Console()
-            .WriteTo.File("logs/myapp.log", rollingInterval: RollingInterval.Day)
+            .WriteTo.File(new JsonFormatter(), "logs/myapp.json", rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
         try

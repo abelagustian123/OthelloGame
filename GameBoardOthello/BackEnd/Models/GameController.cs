@@ -13,6 +13,8 @@ public class GameController : IGameController
     private Dictionary<IPlayer, List<Position>> _validPlacesToMove = new Dictionary<IPlayer, List<Position>>();
     private List<IPlayer> _players;
     
+    //bentuk format json loggingnya
+    
     public event Action<IPlayer>? OnTurnSkipped;
     public event Action<IPlayer>? OnTurnSwitched;
     public event Action<IBoard, IPlayer>? OnMoveMade;

@@ -14,14 +14,12 @@ namespace GameBoardOthello.Api.Controllers;
 public class GameApiController : ControllerBase
 {
     private readonly GameService _gameService;
-    private readonly ILogger<GameApiController> _logger;
 
     public GameApiController(
         GameService gameService,
         ILogger<GameApiController> logger)
     {
         _gameService = gameService;
-        _logger = logger;
     }
 
     
@@ -40,7 +38,6 @@ public class GameApiController : ControllerBase
 
         var state = GameMapper.ToGameStateDto(gameId, game, board, players);
 
-        _logger.LogInformation("New game started: {GameId}", gameId);
 
         return Ok(state);
     }
@@ -106,9 +103,6 @@ public class GameApiController : ControllerBase
         // Return updated state
         GameStateDto newState = GameMapper.ToGameStateDto(gameId, game, board, players);
 
-        _logger.LogInformation(
-            "Move made in game {GameId}: Player={Player}, Position=({Row},{Col}), NextPlayer={NextPlayer}",
-            gameId, currentPlayer.Name, request.Row, request.Col, nextPlayer.Name);
 
         return Ok(new MoveResultDto(
             true,
@@ -164,9 +158,6 @@ public class GameApiController : ControllerBase
         (IBoard board, List<IPlayer> players) = _gameService.GetGameData(gameId)!.Value;
         GameStateDto newState = GameMapper.ToGameStateDto(gameId, game, board, players);
 
-        _logger.LogInformation(
-            "Turn skipped in game {GameId}: {SkippedPlayer} → {NextPlayer}",
-            gameId, currentPlayer.Name, nextPlayer.Name);
 
         return Ok(newState);
     }
@@ -184,7 +175,6 @@ public class GameApiController : ControllerBase
 
         _gameService.RemoveGame(gameId);
 
-        _logger.LogInformation("Game deleted: {GameId}", gameId);
 
         return NoContent();
     }
