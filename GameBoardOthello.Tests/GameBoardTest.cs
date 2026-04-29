@@ -550,12 +550,23 @@ public class IsEndGameShould
         {
             for (int col = 0; col < cols; col++)
             {
-                _board.Square[row, col].Disk = new Disk(Colors.Black);
+                if (row <= 4)
+                {
+                    _board.Square[row, col].Disk = new Disk(Colors.Black);
+                }
+                else
+                {
+                    _board.Square[row, col].Disk = new Disk(Colors.White);
+                }
             }
         }
         
         bool gameEnd = _gc.EndGame();
         Assert.True(gameEnd, "Game telah berakhir");
+
+        Dictionary<IPlayer, int> players = _gc.CheckWinner();
+        Assert.That(players.Values.Max(), Is.EqualTo(40), "Player black memenangkan dengan 40 piece");
+        Assert.That(players.Values.Min(), Is.EqualTo(24), "Player white hanya memasukkan 24 piece");
     }
 }
 
@@ -678,8 +689,8 @@ public class DiskFlipShould()
         
         Colors after = _board.Square[3, 3].Disk.DiskColor;
 
-        Assert.That(before, Is.EqualTo(Colors.White), "Disk White Sebelum di flip");
-        Assert.That(after, Is.EqualTo(Colors.Black), "Disk Black setelah di flip");
+        Assert.That(before, Is.EqualTo(Colors.White), "Disk White sebelum flip");
+        Assert.That(after, Is.EqualTo(Colors.Black), "Disk Black setelah flip");
     }
 
     [Test]

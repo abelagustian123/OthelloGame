@@ -82,16 +82,20 @@ public class GameController : IGameController
 
     public List<IPlayer> GetPlayers() 
     {
+        _logger.Debug($"Method GetPlayers: {_players.Count}");
         return _players;
     }
 
     public IPlayer GetCurrentPlayer()
     {
+        _logger.Debug($"Method GetCurrentPlayer: {_currentPlayer.Name}");
+
         return _currentPlayer;
     }
 
     public IBoard GetBoard()
     {
+        _logger.Debug($"Method GetBoard: {_board}");
         return _board;
     }
 
@@ -200,7 +204,10 @@ public class GameController : IGameController
                     // Ketemu disk sendiri — jika sudah lewati lawan berarti valid
                     if (foundOpponent)
                     {
-                        _logger.Debug($"Move valid di [{square.Position.Row},{square.Position.Col}] untuk {currentPlayer.Name}");
+                        if (_currentPlayer.PlayerColors == playerColor)
+                        {
+                            _logger.Debug($"Move valid di [{square.Position.Row + 1},{square.Position.Col + 1}] untuk {currentPlayer.Name}");
+                        }
                         return true;
                     }
                     break;
@@ -265,12 +272,12 @@ public class GameController : IGameController
 
         int rows = board.Square.GetLength(0);
         int cols = board.Square.GetLength(1);
-        int startRow = _lastMovePosition .Value.Row;
-        int startCol = _lastMovePosition .Value.Col;
+        int startRow = _lastMovePosition.Value.Row;
+        int startCol = _lastMovePosition.Value.Col;
 
         bool anyFlipped = false;  
 
-        // Scan 8 arah menggunakan Direction struct
+        // Scan 8 arah menggunakan Direction 
         foreach (Direction direction in Direction.AllDirections)
         {
             int currentRow = startRow + direction.RowDelta;
@@ -376,7 +383,6 @@ public class GameController : IGameController
         foreach (IPlayer player in _players)
         {
             _playerScore[player] = 0;
-            _logger.Debug("Player score ter-reset untuk dilakukan perhitungan total disk per player");
         }
 
         // Hitung ulang jumlah disk tiap player dengan scan seluruh papan
@@ -413,7 +419,7 @@ public class GameController : IGameController
     public Position? GetLastMovePosition()
     {
         if (_lastMovePosition.HasValue)
-            _logger.Debug($"Last move position adalah [{_lastMovePosition.Value.Row},{_lastMovePosition.Value.Col}]" 
+            _logger.Debug($"Last move position adalah [{_lastMovePosition.Value.Row + 1},{_lastMovePosition.Value.Col + 1}]" 
                 );
         else
             _logger.Debug("Last move position adalah null");

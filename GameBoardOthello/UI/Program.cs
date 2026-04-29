@@ -1,9 +1,8 @@
 using GameBoardOthello.BackEnd.BackEnd.Enums;
 using GameBoardOthello.BackEnd.BackEnd.Interface;
 using GameBoardOthello.BackEnd.BackEnd.Models;
-using GameBoardOthello.BackEnd.BackEnd.Structs;
 using GameBoardOthello.BackEnd.Interface;
-using GameBoardOthello.UI;
+using Serilog;
 
 namespace GameBoardOthello.UI;
 
@@ -13,108 +12,40 @@ public class Program
 
     public static void Main(string[] args)
     {
-        Console.Title = "Othello Game";
-        ConsoleRenderer.ShowWelcome();
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.File("logs/myapp.log", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
 
-        (string p1Name, string p2Name) = ConsoleInputHandler.GetPlayerNames();
-
-        IPlayer blackPlayer = new Player(p1Name, Colors.Black);
-        IPlayer whitePlayer = new Player(p2Name, Colors.White);
-        List<IPlayer> players = new List<IPlayer> { blackPlayer, whitePlayer };
-
-        IBoard board = new Board(new Square[BoardSize, BoardSize]);
-
-        GameController game = new GameController(players, board);
-
-        // Subscribe to events
-        game.OnTurnSwitched += (player) =>
-            Console.WriteLine($"  >> Giliran berpindah ke: {player.Name} ({player.PlayerColors})");
-
-        game.OnTurnSkipped += (player) =>
-            Console.WriteLine($"  >> {player.Name} di-skip (tidak ada move valid).");
-
-        game.OnMoveMade += (b, p) =>
-            Console.WriteLine($"  >> {p.Name} meletakkan disk.");
-
-        game.OnGameConcluded += (b) =>
-            Console.WriteLine("  >> Permainan telah berakhir!");
-
-        // StartGame() now returns bool
-        bool started = game.StartGame();
-        if (!started)
+        try
         {
-            Console.WriteLine("Gagal start game. Butuh minimal 2 players.");
-            Console.WriteLine("\nTekan ENTER untuk keluar...");
-            Console.ReadLine();
-            return;
+            Console.Title = "Othello Game";
+            ConsoleRenderer.ShowWelcome();
+
+            (var p1Name, var p2Name) = ConsoleInputHandler.GetPlayerNames();
+
+            IPlayer blackPlayer = new Player(p1Name, Colors.Black);
+            IPlayer whitePlayer = new Player(p2Name, Colors.White);
+            var players = new List<IPlayer> { blackPlayer, whitePlayer };
+            IBoard board = new Board(new Square[BoardSize, BoardSize]);
+
+            var gameController = new GameController(players, board);
+
+            var consoleApp = new OthelloUi(gameController);
+
+            consoleApp.Run();
         }
-
-        Console.WriteLine("\nGame dimulai! Tekan ENTER...");
-        Console.ReadLine();
-
-        RunGameLoop(game);
-
-        Console.WriteLine("\nTekan ENTER untuk keluar...");
-        Console.ReadLine();
-    }
-
-    private static void RunGameLoop(GameController game)
-    {
-        while (true)
+        catch (Exception ex)
         {
-            IBoard board = game.GetBoard();
-            IPlayer currentPlayer = game.GetCurrentPlayer();
-            Position? lastMove = game.GetLastMovePosition();
-
-            if (game.IsBoardFull() || game.IsBothPlayersCannotMove())
-            {
-                ConsoleRenderer.RenderBoard(board, new List<Position>());
-                
-                game.EndGame();
-
-                List<IPlayer> players = game.GetPlayers();
-                ConsoleRenderer.ShowGameOver(board, players);
-                break;
-            }
-
-            List<Position> validMoves = game.GetValidMoves(currentPlayer);
-
-            if (validMoves.Count == 0)
-            {
-                ConsoleRenderer.RenderBoard(board, validMoves, lastMove);
-                Console.WriteLine($"\n{currentPlayer.Name} tidak punya move valid. Turn di-skip.");
-                game.NotifyTurnSkipped(currentPlayer);
-                
-                IPlayer nextPlayer = game.SwitchTurn();
-                
-                Console.WriteLine("\nTekan ENTER...");
-                Console.ReadLine();
-                continue;
-            }
-
-            ConsoleRenderer.RenderBoard(board, validMoves, lastMove);
-            ConsoleRenderer.ShowScore(board);
-            Console.WriteLine($"\nGiliran: {currentPlayer.Name} ({currentPlayer.PlayerColors})");
-            Console.WriteLine($"Valid moves: {string.Join(", ", validMoves.Select(p => $"({p.Row},{p.Col})"))}");
-
-            Position selectedPos = ConsoleInputHandler.GetMoveInput(validMoves);
-
-            Square targetSquare = board.Square[selectedPos.Row, selectedPos.Col];
-            
-            bool moveSuccess = game.PutDiskOnBoard(currentPlayer, targetSquare);
-            
-            if (!moveSuccess)
-            {
-                Console.WriteLine("ERROR: Move gagal! (tidak seharusnya terjadi jika validasi benar)");
-                Console.WriteLine("Tekan ENTER...");
-                Console.ReadLine();
-                continue;
-            }
-
-            IPlayer nextPlayer2 = game.SwitchTurn();
-
-            Console.WriteLine("\nTekan ENTER...");
-            Console.ReadLine();
+            Console.WriteLine($"Fatal error: {ex.Message}");
+            Log.Fatal(ex, "Aplikasi berhenti karena fatal error.");
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+        }
+        finally
+        {
+            Log.CloseAndFlush();
         }
     }
 }
